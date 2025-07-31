@@ -3,19 +3,19 @@ package usecase
 import (
 	"errors"
 
-	"github.com/sol-tad/Blog-post-Api/domian"
+	"github.com/sol-tad/Blog-post-Api/domain"
 )
 
 type UserUsecase struct {
-	UserRepository domian.UserRepository
+	UserRepository domain.UserRepository
 }
 
-func NewUserUsecase(userRepo domian.UserRepository) *UserUsecase{
+func NewUserUsecase(userRepo domain.UserRepository) *UserUsecase{
 	return &UserUsecase{
 		UserRepository: userRepo,
 	}
 }
-func (uuc *UserUsecase) Register(user domian.User) error{
+func (uuc *UserUsecase) Register(user domain.User) error{
 	if user.Username=="" ||user.Password==""{
 		return errors.New("missing required fileds")
 	}
