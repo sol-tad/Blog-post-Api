@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func (uc *UserController) Register(c *gin.Context){
 		return
 	}
 
-	if err:=uc.UserUsecase.Register(user);err!=nil{
+	if err:=uc.UserUsecase.Register(context.Background(),user);err!=nil{
 		 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
 	}
@@ -34,5 +35,56 @@ func (uc *UserController) Register(c *gin.Context){
 }
 
 func (uc *UserController) Login(c *gin.Context){
+	var req struct{
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err:=c.ShouldBindJSON(&req); err!=nil{
+		c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
+		return
+	}
+	accessToken,refreshToken,err:=uc.UserUsecase.Login(context.Background(), req.Username, req.Password)
+
+	    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "access_token":  accessToken,
+        "refresh_token": refreshToken,
+    })
+}
+
+
+func (uc UserController) RefreshTokenController(c *gin.Context){
+	var req struct{
+		RefreshToken  string `json:"refresh_token"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+	token,err:=uc.UserUsecase.RefreshToken(context.Background(),req.RefreshToken)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"access_token": token})
+}
+
+func (uc UserController) Logout(c *gin.Context) {
+	userID := c.GetString("user_id")
+
+	err := uc.UserUsecase.Logout(context.Background(), userID)
+	    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "logout failed"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 
 }
