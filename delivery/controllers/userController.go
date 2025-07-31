@@ -34,5 +34,5 @@ func (uc *UserController) Register(c *gin.Context){
 }
 
 func (uc *UserController) Login(c *gin.Context){
-
+	
 }
