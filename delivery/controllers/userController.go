@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"log"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -66,25 +68,27 @@ func (uc UserController) RefreshTokenController(c *gin.Context){
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+	// log.Println("Refresh Token----------->:", req.RefreshToken)
 
 	token,err:=uc.UserUsecase.RefreshToken(context.Background(),req.RefreshToken)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token*****"})
         return
     }
 
     c.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
-func (uc UserController) Logout(c *gin.Context) {
-	userID := c.GetString("user_id")
+	func (uc UserController) Logout(c *gin.Context) {
+		userID := c.GetString("id")
+		log.Println("id============:", userID)
 
-	err := uc.UserUsecase.Logout(context.Background(), userID)
-	    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "logout failed"})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
+		err := uc.UserUsecase.Logout(context.Background(), userID)
+			if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "logout failed"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 
-}
+	}

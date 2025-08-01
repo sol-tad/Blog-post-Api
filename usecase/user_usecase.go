@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+
 	"github.com/sol-tad/Blog-post-Api/domian"
 	"github.com/sol-tad/Blog-post-Api/infrastructure"
 )
@@ -61,6 +62,7 @@ func (uuc *UserUsecase) Login(ctx context.Context, username, password string )(a
 
 
 func (uuc *UserUsecase) RefreshToken(ctx context.Context, refreshToken string)(string, error){
+
 
     userID, err := infrastructure.VerifyRefreshToken(refreshToken)
     if err != nil {
