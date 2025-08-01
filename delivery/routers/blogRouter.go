@@ -2,10 +2,10 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sol-tad/Blog-post-Api/config"
-	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
-	"github.com/sol-tad/Blog-post-Api/repository"
-	"github.com/sol-tad/Blog-post-Api/usecase"
+// 	"github.com/sol-tad/Blog-post-Api/config"
+// 	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
+// 	"github.com/sol-tad/Blog-post-Api/repository"
+// 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
 

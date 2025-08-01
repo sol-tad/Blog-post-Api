@@ -124,3 +124,35 @@ func (ur *UserRepositoryImpl) FindByID(ctx context.Context, userID string) (doma
 	}
 	return user, nil
 }
+
+func (r *UserRepositoryImpl) UpdateResetOTP(ctx context.Context, email, otp string) error {
+	filter := bson.M{"email": email}
+	update := bson.M{"$set": bson.M{"reset_otp": otp}}
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (r *UserRepositoryImpl) VerifyResetOTP(ctx context.Context, email, otp string) error {
+	filter := bson.M{"email": email, "reset_otp": otp}
+
+	var user domain.User
+	err := r.collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return errors.New("invalid OTP or email")
+	}
+	return nil
+}
+
+func (r *UserRepositoryImpl) UpdatePasswordByEmail(ctx context.Context, email, newHashedPassword string) error {
+	filter := bson.M{"email": email}
+	update := bson.M{
+		"$set": bson.M{
+			"password":   newHashedPassword,
+			"reset_otp":  "", // Clear OTP after success
+		},
+	}
+
+	_, err := r.collection.UpdateOne(ctx, filter, update)
+	return err
+}

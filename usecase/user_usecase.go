@@ -117,3 +117,32 @@ func (uuc *UserUsecase) RefreshToken(ctx context.Context, refreshToken string)(s
 func (uuc *UserUsecase) Logout(ctx context.Context, userID string) error {
     return uuc.UserRepository.DeleteRefreshToken(ctx, userID)
 }
+
+
+func (u *UserUsecase) SendResetOTP(ctx context.Context, email string) error {
+	user, err := u.UserRepository.FindByEmail(ctx, email)
+	if err != nil || user == nil {
+		return errors.New("user not found")
+	}
+
+	otp := infrastructure.GenerateOTP()
+	if err := u.UserRepository.UpdateResetOTP(ctx, email, otp); err != nil {
+		return err
+	}
+
+	return infrastructure.SendOTP(email, otp)
+}
+
+func (u *UserUsecase) ResetPassword(ctx context.Context, email, otp, newPassword string) error {
+	err := u.UserRepository.VerifyResetOTP(ctx, email, otp)
+	if err != nil {
+		return err
+	}
+
+	hashedPassword, err := infrastructure.HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	return u.UserRepository.UpdatePasswordByEmail(ctx, email, hashedPassword)
+}

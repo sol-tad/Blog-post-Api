@@ -21,11 +21,15 @@ func SetupUserRoutes(router *gin.Engine) {
 	userRoutes:=router.Group("")
 
 	{
+		
 		userRoutes.POST("/register",userController.Register)
 		userRoutes.POST("/verify-otp",userController.VerifyOTP)
 		userRoutes.POST("/login",userController.Login)
 		userRoutes.POST("/refresh",userController.RefreshTokenController)
 		userRoutes.POST("/logout",middlewares.AuthMiddleware(),userController.Logout)
+		
+		userRoutes.POST("/forgot-password", userController.SendResetOTP)
+		userRoutes.POST("/reset-password", userController.ResetPassword)
 	}
 }
 

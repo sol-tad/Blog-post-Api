@@ -15,6 +15,17 @@ type UserController struct {
 	UserUsecase *usecase.UserUsecase
 }
 
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type ResetPasswordRequest struct {
+	Email       string `json:"email" binding:"required,email"`
+	OTP         string `json:"otp" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=6,max=50"`
+}
+
+
 func NewUserController(userUsecase *usecase.UserUsecase) *UserController {
 	return &UserController{
 		UserUsecase: userUsecase,
@@ -110,3 +121,41 @@ func (uc UserController) Logout(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 
 	}
+
+
+
+func (uc *UserController) SendResetOTP(c *gin.Context) {
+	var req ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Println("Forgot password request received for:", req.Email)
+
+	err := uc.UserUsecase.SendResetOTP(c, req.Email)
+	if err != nil {
+		log.Println("SendResetOTP error:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send reset OTP"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reset OTP sent to your email address"})
+}
+
+
+func (uc *UserController) ResetPassword(c *gin.Context) {
+	var req ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	err := uc.UserUsecase.ResetPassword(c, req.Email, req.OTP, req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+}
