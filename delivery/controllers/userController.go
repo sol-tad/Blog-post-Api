@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sol-tad/Blog-post-Api/domian"
+	"github.com/sol-tad/Blog-post-Api/domain"
 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
@@ -21,7 +21,7 @@ func NewUserController(userUsecase *usecase.UserUsecase) *UserController {
 	}
 }
 func (uc *UserController) Register(c *gin.Context) {
-	var user domian.User
+	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

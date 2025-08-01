@@ -7,20 +7,20 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/sol-tad/Blog-post-Api/domian"
+	"github.com/sol-tad/Blog-post-Api/domain"
 	"github.com/sol-tad/Blog-post-Api/infrastructure"
 )
 
 type UserUsecase struct {
-	UserRepository domian.UserRepository
+	UserRepository domain.UserRepository
 }
 
-func NewUserUsecase(userRepo domian.UserRepository) *UserUsecase{
+func NewUserUsecase(userRepo domain.UserRepository) *UserUsecase{
 	return &UserUsecase{
 		UserRepository: userRepo,
 	}
 }
-func (uuc *UserUsecase) Register(ctx context.Context, user domian.User) error {
+func (uuc *UserUsecase) Register(ctx context.Context, user domain.User) error {
 	if user.Username == "" || user.Password == "" || user.Email == "" {
 		return errors.New("missing required fields")
 	}

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/sol-tad/Blog-post-Api/domian"
+	"github.com/sol-tad/Blog-post-Api/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,20 +14,20 @@ import (
 type UserRepositoryImpl struct {
 	collection *mongo.Collection
 }
-func NewUserRepository(coll *mongo.Collection) domian.UserRepository {
+func NewUserRepository(coll *mongo.Collection) domain.UserRepository {
 	return &UserRepositoryImpl{
 		collection: coll,
 	}
 }
 
 
-func (ur *UserRepositoryImpl) Register(ctx context.Context, user domian.User) (domian.User, error) {
+func (ur *UserRepositoryImpl) Register(ctx context.Context, user domain.User) (domain.User, error) {
 	_, err := ur.collection.InsertOne(ctx, user)
 	return user, err
 }
 
-func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*domian.User, error) {
-	var user domian.User
+func (ur *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+	var user domain.User
 	err := ur.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func (ur *UserRepositoryImpl) VerifyUserOTP(ctx context.Context, email, otp stri
 	return nil
 }
 
-func (ur *UserRepositoryImpl) Login(ctx context.Context,username string)(domian.User,error){
-	var user domian.User
+func (ur *UserRepositoryImpl) Login(ctx context.Context,username string)(domain.User,error){
+	var user domain.User
     err := ur.collection.FindOne(context.Background(), map[string]string{"username": username}).Decode(&user)
         if err != nil {
         return user, errors.New("user not found")
@@ -78,7 +78,7 @@ func (ur *UserRepositoryImpl) VerifyRefreshToken(ctx context.Context, userID str
         return false, errors.New("invalid user ID format")
     }
 
-    var user domian.User
+    var user domain.User
     err = ur.collection.FindOne(ctx, bson.M{
         "_id":           objID,
         "refresh_token":  refreshToken, // match the field name you used in SaveRefreshToken
@@ -107,8 +107,8 @@ func (ur *UserRepositoryImpl) DeleteRefreshToken(ctx context.Context, userID str
 }
 
 
-func (ur *UserRepositoryImpl) FindByID(ctx context.Context, userID string) (domian.User, error) {
-	var user domian.User
+func (ur *UserRepositoryImpl) FindByID(ctx context.Context, userID string) (domain.User, error) {
+	var user domain.User
 
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
