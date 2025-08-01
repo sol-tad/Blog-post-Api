@@ -8,15 +8,17 @@ import (
 
 
 type Blog struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	Title      string             `bson:"title"`
-	Content    string             `bson:"content"`
-	AuthorID   primitive.ObjectID `bson:"author_id"`
-	AuthorName string             `bson:"author_name"`
-	Tags       []string           `bson:"tags"`
-	CreatedAt  time.Time          `bson:"created_at"`
-	UpdatedAt  time.Time          `bson:"updated_at"`
-	Stats      BlogStats          `bson:"stats"`
+	ID  primitive.ObjectID        `json:"id,omitempty" bson:"_id,omitempty"`
+	Title string            	  `json:"title,omitempty" bson:"title,omitempty" validate:"required"`
+	Content string 				  `json:"content,omitempty" bson:"content,omitempty" validate:"required"`
+	AuthorID primitive.ObjectID   `json:"author_id" bson:"author_id" validate:"required"`
+	AuthorName string             `json:"author_name" bson:"author_name" validate:"required"`
+	Tags       []string           `json:"tags" bson:"tags" validate:"required"`
+	CreatedAt   time.Time       `json:"created_at" bson:"created_at"`
+	UpdatedAt  time.Time         `json:"updated_at" bson:"updated_at"`
+	Stats     BlogStats    		`json:"stats" bson:"stats"`
+
+
 
 }
 
