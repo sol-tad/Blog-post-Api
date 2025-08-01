@@ -20,22 +20,32 @@ func NewBlogController (blog *usecase.BlogUseCase) *BlogController{
 }
 
 type BlogDTO struct{
-	ID 		primitive.ObjectID  `json:"_id"`
+	ID 		primitive.ObjectID  `json:"id"`
 	Title   string 				`json:"title"`
 	Content string 				`json:"content"`
-	Tags    string 				`json:"tags"`
-	Date    time.Time 			`json:"date"`
-	User 	domain.User 		`json:"user"`
+	Tags    []string 			`json:"tags"`
+	AuthorID primitive.ObjectID `json:"author_id"`
+	AuthorName string           `json:"author_name"`
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt  time.Time        `json:"updated_at"`
+	Stats     domain.BlogStats  `json:"stats"`
 }
 func (bc *BlogController) ChangeToBlog(blogDTO BlogDTO) *domain.Blog{
 	var domBlog domain.Blog
 	domBlog.Content = blogDTO.Content
+	domBlog.ID = blogDTO.ID
 	domBlog.Title = blogDTO.Title
 	domBlog.Tags = blogDTO.Tags
-	domBlog.Date = blogDTO.Date
-	domBlog.User = blogDTO.User
+	domBlog.CreatedAt = blogDTO.CreatedAt
+	domBlog.UpdatedAt = blogDTO.UpdatedAt
+	domBlog.AuthorID = blogDTO.AuthorID
+	domBlog.AuthorName = blogDTO.AuthorName
+	domBlog.Stats = blogDTO.Stats
+	
 	return &domBlog
 }
+
+
 func (bc *BlogController) CreateBlogController (ctx *gin.Context){
 	var newBlog BlogDTO
 	if err := ctx.ShouldBindJSON(&newBlog); err != nil {
@@ -44,6 +54,8 @@ func (bc *BlogController) CreateBlogController (ctx *gin.Context){
 	}
 	blog := bc.ChangeToBlog(newBlog)
 	bc.BlogUseCase.CreateBlog(blog)
+	ctx.JSON(http.StatusOK, gin.H{"message": "blog created successfully"})
+	
 }
 
 func (bc *BlogController) ViewBlogsController(ctx *gin.Context){
@@ -54,7 +66,11 @@ func (bc *BlogController) ViewBlogsController(ctx *gin.Context){
 	}
 	ctx.IndentedJSON(http.StatusOK, blogs)
 }
-
+func (bc *BlogController) ViewBlogByIDController(ctx *gin.Context){
+	id := ctx.Param("id")
+	blog := bc.BlogUseCase.ViewBlogByID(id)
+	ctx.IndentedJSON(200 , blog)
+ }
 func (bc *BlogController) UpdateBlogController(ctx *gin.Context){
 	id := ctx.Param("id")
 	var updatedBlog BlogDTO
@@ -79,5 +95,10 @@ func (bc *BlogController) DeleteBlogController(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
+	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Blog deleted successfully"})
 }
+
+
+
+// add the controllers for your additional endpoints here.
+
