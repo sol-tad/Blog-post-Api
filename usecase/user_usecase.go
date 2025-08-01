@@ -1,9 +1,14 @@
 package usecase
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"log"
+	"math/rand"
 
 	"github.com/sol-tad/Blog-post-Api/domian"
+	"github.com/sol-tad/Blog-post-Api/infrastructure"
 )
 
 type UserUsecase struct {
@@ -15,10 +20,100 @@ func NewUserUsecase(userRepo domian.UserRepository) *UserUsecase{
 		UserRepository: userRepo,
 	}
 }
-func (uuc *UserUsecase) Register(user domian.User) error{
-	if user.Username=="" ||user.Password==""{
-		return errors.New("missing required fileds")
+func (uuc *UserUsecase) Register(ctx context.Context, user domian.User) error {
+	if user.Username == "" || user.Password == "" || user.Email == "" {
+		return errors.New("missing required fields")
 	}
-	_,err:=uuc.UserRepository.CreateUser(user)
-	return err
+
+	// Check for existing user
+	existing, _ := uuc.UserRepository.FindByEmail(ctx, user.Email)
+	if existing != nil {
+		return errors.New("user with this email already exists")
+	}
+
+	// Hash password
+	hashedPassword, _ := infrastructure.HashPassword(user.Password)
+	user.Password = hashedPassword
+
+	// Generate OTP
+	user.OTPCode = fmt.Sprintf("%06d", rand.Intn(1000000))
+	user.IsVerified = false
+	user.Role = "user"
+
+	// Save user
+	_, err := uuc.UserRepository.Register(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	// Send OTP via SendGrid
+	return infrastructure.SendOTP(user.Email, user.OTPCode)
+}
+
+func (uuc *UserUsecase) VerifyOTP(ctx context.Context, email, otp string) error {
+	return uuc.UserRepository.VerifyUserOTP(ctx, email, otp)
+}
+
+
+
+func (uuc *UserUsecase) Login(ctx context.Context, username, password string)(accessToken string, refreshToken string, err error) {
+	user, err := uuc.UserRepository.Login(ctx, username)
+	log.Println("USER&&&&&&&&&&&&&&&",user)
+	if err != nil {
+		return "", "", errors.New("invalid username or password")
+	}
+
+	//  Check if user is verified
+	if !user.IsVerified {
+		return "", "", errors.New("please verify your email before logging in")
+	}
+
+	if !infrastructure.CheckPassword(password, user.Password) {
+		return "", "", errors.New("invalid username or password")
+	}
+
+	accessToken, err = infrastructure.GenerateAccessToken(user.ID.Hex(), user.Role)
+	if err != nil {
+		return "", "", err
+	}
+	refreshToken, err = infrastructure.GenerateRefreshToken(user.ID.Hex())
+	if err != nil {
+		return "", "", err
+	}
+
+	// Store the refresh token
+	err = uuc.UserRepository.SaveRefreshToken(ctx, user.ID.Hex(), refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+
+func (uuc *UserUsecase) RefreshToken(ctx context.Context, refreshToken string)(string, error){
+
+
+    userID, err := infrastructure.VerifyRefreshToken(refreshToken)
+    if err != nil {
+        return "", err
+    }
+
+	ok, err := uuc.UserRepository.VerifyRefreshToken(ctx, userID, refreshToken)
+    if err != nil || !ok {
+        return "", errors.New("invalid or expired refresh token")
+    }
+
+	    // Generate new access token
+    user, err := uuc.UserRepository.FindByID(ctx, userID)
+    if err != nil {
+        return "", err
+    }
+
+    return infrastructure.GenerateAccessToken(user.ID.Hex(), user.Role)
+
+}
+
+func (uuc *UserUsecase) Logout(ctx context.Context, userID string) error {
+    return uuc.UserRepository.DeleteRefreshToken(ctx, userID)
 }
