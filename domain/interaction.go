@@ -23,4 +23,8 @@ type InteractionRepository interface {
 	RemoveLike(blogID string, userID primitive.ObjectID) error
 	AddDislike(blogID string, userID primitive.ObjectID) error
 	RemoveDislike(blogID string, userID primitive.ObjectID) error
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 522ada5488239895107ba28f5ba4fc1eb6f41b4c

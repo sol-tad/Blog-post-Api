@@ -59,4 +59,3 @@ type BlogFilter struct {
 	SortBy    string
 	SortOrder string  // "asc" or "dsc"
 }
-
