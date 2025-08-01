@@ -1,4 +1,4 @@
-package domian
+package domain
 
 import (
 	"time"
@@ -33,7 +33,7 @@ type BlogStats struct {
 
 
 // This defines the interface for the blog data operations
-type BlogRepositary interface {
+type BlogRepository interface {
 	Create(blog *Blog) error
 	GetByID( id string) (*Blog, error)
 	GetByAuthor(author string, limt, page string) ([]*Blog, error)
@@ -52,11 +52,11 @@ type BlogRepositary interface {
 // this contains parametres for filtering  
 type BlogFilter struct {
 	Search  	string
-	 Author 	string
-	 Tag    	string 
-	 StratDate  time.Time 
-	 EndDate    time.Time
-	  SortBy    string
-	  SortOrder string  // "asc" or "dsc"
+	Author 	string
+	Tag    	string 
+	StratDate  time.Time 
+	EndDate    time.Time
+	SortBy    string
+	SortOrder string  // "asc" or "dsc"
 }
 
