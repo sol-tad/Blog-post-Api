@@ -2,24 +2,26 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-// 	"github.com/sol-tad/Blog-post-Api/config"
-// 	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
-// 	"github.com/sol-tad/Blog-post-Api/repository"
-// 	"github.com/sol-tad/Blog-post-Api/usecase"
+	"github.com/sol-tad/Blog-post-Api/config"
+	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
+	"github.com/sol-tad/Blog-post-Api/repository"
+	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
-
 func SetupBlogRoutes(router *gin.Engine) {
+	blogDbCollection := config.BlogCollection
 
-	// blogDbCollection:=config.BlogCollection
-	// blogRepository:=repository.NewBlogRepository(blogDbCollection)
-	// blogUsecase:=usecase.NewBlogUsecase(blogRepository)
-	// blogController:=controllers.NewBlogController(blogUsecase)
+	blogRepository := repository.NewBlogRepo(blogDbCollection)
+	blogUseCase := usecase.NewBlogUseCase(blogRepository)
+	blogController := controllers.NewBlogController(blogUseCase)
 
-	// blogRoutes:=router.Group("")
+	// endpoints: create, reterive, update,delete
+	router.POST("/createblog", blogController.CreateBlogController)
+	router.GET("/viewblogs", blogController.ViewBlogsController)
+	router.PUT("/updateblog/:id", blogController.UpdateBlogController)
+	router.DELETE("/deleteblog/:id", blogController.DeleteBlogController)
+	router.GET("/viewblogbyid/:id", blogController.ViewBlogByIDController)
 
-	{
-		// blogRoutes.POST("",blogController.)
-		// blogRoutes.POST("",blogController.)
-	}
+
+// for your work, if there is a router needed, you can add it here.
 }

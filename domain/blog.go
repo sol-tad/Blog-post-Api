@@ -45,6 +45,8 @@ type BlogRepositary interface {
 	IncrementDislikeCount(blogID string) error
 	DecrementLikeCount(blogID string) error
 	DecrementDislikeCount(blogID string) error
+	IncrementCommentCount(blogID string) error
+	DecrementCommentCount(blogID string) error 
 	
 
 }
@@ -53,8 +55,8 @@ type BlogRepositary interface {
 type BlogFilter struct {
 	Search  	string
 	 Author 	string
-	 Tag    	string 
-	 StratDate  time.Time 
+	 Tags    	string 
+	 StartDate  time.Time 
 	 EndDate    time.Time
 	  SortBy    string
 	  SortOrder string  // "asc" or "dsc"

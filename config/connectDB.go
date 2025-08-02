@@ -11,6 +11,7 @@ import (
 )
 
 var UserCollection *mongo.Collection
+var BlogCollection *mongo.Collection
 
 func ConnectDB(){
     MONGODB_URI := os.Getenv("MONGODB_URI")
@@ -25,6 +26,7 @@ func ConnectDB(){
 		log.Fatal(err)
 	}
 	UserCollection=client.Database("blogDB").Collection("users")
+	BlogCollection=client.Database("blogDB").Collection("blogs")
 	log.Println("Connected to MongoDB")
 
 }

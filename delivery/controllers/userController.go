@@ -199,3 +199,5 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+
