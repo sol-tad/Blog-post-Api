@@ -159,3 +159,43 @@ func (uc *UserController) ResetPassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
+
+func (uc *UserController) PromoteUser(c *gin.Context) {
+	adminID := c.GetString("id") // from middleware
+	targetID := c.Param("id")
+
+	if err := uc.UserUsecase.PromoteUser(c, adminID, targetID); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin"})
+}
+
+func (uc *UserController) DemoteUser(c *gin.Context) {
+	adminID := c.GetString("id") // from middleware
+	targetID := c.Param("id")
+
+	if err := uc.UserUsecase.DemoteUser(c, adminID, targetID); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User demoted to regular user"})
+}
+
+func (uc *UserController) UpdateProfile(c *gin.Context) {
+	userID := c.GetString("id") // from AuthMiddleware
+
+	var updated domain.User
+	if err := c.ShouldBindJSON(&updated); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := uc.UserUsecase.UpdateProfile(c, userID, updated)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}

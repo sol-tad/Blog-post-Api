@@ -30,6 +30,13 @@ func SetupUserRoutes(router *gin.Engine) {
 		
 		userRoutes.POST("/forgot-password", userController.SendResetOTP)
 		userRoutes.POST("/reset-password", userController.ResetPassword)
+
+		userRoutes.PUT("/profile", middlewares.AuthMiddleware(), userController.UpdateProfile)
+
+
+		userRoutes.POST("/user/:id/promote", middlewares.AuthMiddleware(), userController.PromoteUser)
+		userRoutes.POST("/user/:id/demote", middlewares.AuthMiddleware(), userController.DemoteUser)
+
 	}
 }
 

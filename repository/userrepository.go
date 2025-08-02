@@ -156,3 +156,37 @@ func (r *UserRepositoryImpl) UpdatePasswordByEmail(ctx context.Context, email, n
 	_, err := r.collection.UpdateOne(ctx, filter, update)
 	return err
 }
+func (ur *UserRepositoryImpl) UpdateUserRole(ctx context.Context, userID string, role string) error {
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": objID}
+	update := bson.M{"$set": bson.M{"role": role}}
+
+	_, err = ur.collection.UpdateOne(ctx, filter, update)
+	return err
+}
+
+func (ur *UserRepositoryImpl) UpdateProfile(ctx context.Context, userID string, updated domain.User) (domain.User, error) {
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"bio":             updated.Bio,
+			"profile_picture": updated.ProfilePicture,
+			"contact_info":    updated.ContactInfo,
+		},
+	}
+
+	_, err = ur.collection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return ur.FindByID(ctx, userID)
+}

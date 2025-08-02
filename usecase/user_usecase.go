@@ -146,3 +146,24 @@ func (u *UserUsecase) ResetPassword(ctx context.Context, email, otp, newPassword
 
 	return u.UserRepository.UpdatePasswordByEmail(ctx, email, hashedPassword)
 }
+
+
+func (uuc *UserUsecase) PromoteUser(ctx context.Context, adminID string, targetUserID string) error {
+	admin, err := uuc.UserRepository.FindByID(ctx, adminID)
+	if err != nil || admin.Role != "admin" {
+		return errors.New("unauthorized")
+	}
+	return uuc.UserRepository.UpdateUserRole(ctx, targetUserID, "admin")
+}
+
+func (uuc *UserUsecase) DemoteUser(ctx context.Context, adminID string, targetUserID string) error {
+	admin, err := uuc.UserRepository.FindByID(ctx, adminID)
+	if err != nil || admin.Role != "admin" {
+		return errors.New("unauthorized")
+	}
+	return uuc.UserRepository.UpdateUserRole(ctx, targetUserID, "user")
+}
+
+func (uuc *UserUsecase) UpdateProfile(ctx context.Context, userID string, updated domain.User) (domain.User, error) {
+	return uuc.UserRepository.UpdateProfile(ctx, userID, updated)
+}

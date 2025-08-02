@@ -16,6 +16,9 @@ type User struct {
 	OTPCode    string             `bson:"otp_code"`
 	ResetOTP     string             `bson:"reset_otp"` 
 	IsVerified bool               `bson:"is_verified"`
+	Bio           string             `json:"bio,omitempty" bson:"bio,omitempty"`
+	ProfilePicture string            `json:"profile_picture,omitempty" bson:"profile_picture,omitempty"`
+	ContactInfo   string             `json:"contact_info,omitempty" bson:"contact_info,omitempty"`
 
 }
 
@@ -31,4 +34,11 @@ type UserRepository interface {
 	UpdateResetOTP(ctx context.Context, email, otp string) error
 	VerifyResetOTP(ctx context.Context, email, otp string) error
 	UpdatePasswordByEmail(ctx context.Context, email, newHashedPassword string) error
+	UpdateProfile(ctx context.Context, userID string, updated User) (User, error)
+
+
+	// PromoteUser(ctx context.Context, adminID string, targetUserID string) error
+	// DemoteUser(ctx context.Context, adminID string, targetUserID string) error
+
+	UpdateUserRole(ctx context.Context, userID string, role string) error
 }
