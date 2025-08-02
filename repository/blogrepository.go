@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type BlogRepo struct{
@@ -18,7 +19,7 @@ type BlogRepo struct{
 
 func NewBlogRepo(coll *mongo.Collection) usecase.IBlogRepo {
 	ctx := context.Background()
-	return &BlogRepo{	
+	return &IBlogRepo{
 		collection: coll,
 		context: ctx,
 	}
@@ -87,106 +88,106 @@ func (b *BlogRepo) DeleteBlog(id primitive.ObjectID) error{
 // on this part, i have just make naming modifications inorder to be consistent. so , you can just focus on the implementation.
 
 
-// func (b *BlogRepo) List(page, limit int, filter domain.BlogFilter) ([]*domain.Blog, int64, error) {
-// 	// Build filter query
-// 	query := bson.M{}
+func (b *BlogRepo) List(page, limit int, filter domain.BlogFilter) ([]*domain.Blog, int64, error) {
+	// Build filter query
+	query := bson.M{}
 	
-// 	if filter.Search != "" {
-// 		query["$or"] = bson.A{
-// 			bson.M{"title": primitive.Regex{Pattern: filter.Search, Options: "i"}},
-// 			bson.M{"author_name": primitive.Regex{Pattern: filter.Search, Options: "i"}},
-// 		}
-// 	}
+	if filter.Search != "" {
+		query["$or"] = bson.A{
+			bson.M{"title": primitive.Regex{Pattern: filter.Search, Options: "i"}},
+			bson.M{"author_name": primitive.Regex{Pattern: filter.Search, Options: "i"}},
+		}
+	}
 	
-// 	if filter.Author != "" {
-// 		query["author_name"] = primitive.Regex{Pattern: filter.Author, Options: "i"}
-// 	}
+	if filter.Author != "" {
+		query["author_name"] = primitive.Regex{Pattern: filter.Author, Options: "i"}
+	}
 	
-// 	if len(filter.Tags) > 0 {
-// 		query["tags"] = bson.M{"$all": filter.Tags}
-// 	}
+	if len(filter.Tags) > 0 {
+		query["tags"] = bson.M{"$all": filter.Tags}
+	}
 	
-// 	if !filter.StartDate.IsZero() && !filter.EndDate.IsZero() {
-// 		query["created_at"] = bson.M{
-// 			"$gte": filter.StartDate,
-// 			"$lte": filter.EndDate,
-// 		}
-// 	}
+	if !filter.StartDate.IsZero() && !filter.EndDate.IsZero() {
+		query["created_at"] = bson.M{
+			"$gte": filter.StartDate,
+			"$lte": filter.EndDate,
+		}
+	}
 	
-// 	// Sorting
-// 	sortOption := -1 // default descending
-// 	if filter.SortOrder == "asc" {
-// 		sortOption = 1
-// 	}
+	// Sorting
+	sortOption := -1 // default descending
+	if filter.SortOrder == "asc" {
+		sortOption = 1
+	}
 	
-// 	sort := bson.D{{Key: filter.SortBy, Value: sortOption}}
+	sort := bson.D{{Key: filter.SortBy, Value: sortOption}}
 	
-// 	// Pagination options
-// 	opts := options.Find().
-// 		SetSort(sort).
-// 		SetSkip(int64((page - 1) * limit)).
-// 		SetLimit(int64(limit))
+	// Pagination options
+	opts := options.Find().
+		SetSort(sort).
+		SetSkip(int64((page - 1) * limit)).
+		SetLimit(int64(limit))
 	
-// 	// Get total count
-// 	total, err := b.collection.CountDocuments(context.Background(), query)
-// 	if err != nil {
-// 		return nil, 0, err
-// 	}
+	// Get total count
+	total, err := b.collection.CountDocuments(context.Background(), query)
+	if err != nil {
+		return nil, 0, err
+	}
 	
-// 	// Find documents
-// 	cursor, err := b.collection.Find(context.Background(), query, opts)
-// 	if err != nil {
-// 		return nil, 0, err
-// 	}
-// 	defer cursor.Close(context.Background())
+	// Find documents
+	cursor, err := b.collection.Find(context.Background(), query, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(context.Background())
 	
-// 	var blogs []*domain.Blog
-// 	if err = cursor.All(context.Background(), &blogs); err != nil {
-// 		return nil, 0, err
-// 	}
+	var blogs []*domain.Blog
+	if err = cursor.All(context.Background(), &blogs); err != nil {
+		return nil, 0, err
+	}
 	
-// 	return blogs, total, nil
-// }
+	return blogs, total, nil
+}
 
-// func (b *BlogRepo) IncrementViewCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.views", 1)
-// }
+func (b *BlogRepo) IncrementViewCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.views", 1)
+}
 
-// func (b *BlogRepo) IncrementLikeCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.likes", 1)
-// }
+func (b *BlogRepo) IncrementLikeCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.likes", 1)
+}
 
-// func (b *BlogRepo) IncrementDislikeCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.dislikes", 1)
-// }
+func (b *BlogRepo) IncrementDislikeCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.dislikes", 1)
+}
 
-// func (b *BlogRepo) DecrementLikeCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.likes", -1)
-// }
+func (b *BlogRepo) DecrementLikeCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.likes", -1)
+}
 
-// func (b *BlogRepo) DecrementDislikeCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.dislikes", -1)
-// }
+func (b *BlogRepo) DecrementDislikeCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.dislikes", -1)
+}
 
-// func (b *BlogRepo) IncrementCommentCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.comments", 1)
-// }
+func (b *BlogRepo) IncrementCommentCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.comments", 1)
+}
 
-// func (b *BlogRepo) DecrementCommentCount(blogID string) error {
-// 	return b.updateCounter(blogID, "stats.comments", -1)
-// }
+func (b *BlogRepo) DecrementCommentCount(blogID string) error {
+	return b.updateCounter(blogID, "stats.comments", -1)
+}
 
-// // Helper function for atomic counter updates
-// func (b *BlogRepo) updateCounter(blogID, field string, value int) error {
-// 	objID, err := primitive.ObjectIDFromHex(blogID)
-// 	if err != nil {
-// 		return err
-// 	}
+// Helper function for atomic counter updates
+func (b *BlogRepo) updateCounter(blogID, field string, value int) error {
+	objID, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return err
+	}
 	
-// 	_, err = b.collection.UpdateByID(
-// 		context.Background(),
-// 		objID,
-// 		bson.M{"$inc": bson.M{field: value}},
-// 	)
-// 	return err
-// }
+	_, err = b.collection.UpdateByID(
+		context.Background(),
+		objID,
+		bson.M{"$inc": bson.M{field: value}},
+	)
+	return err
+}

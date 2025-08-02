@@ -22,7 +22,7 @@ type Comment struct {
 type CommentRepository interface {
 	Create(comment *Comment) error
 	GetByID(id string) (*Comment, error)
-	GetByBlog( blogID string, page, limit int) ( *[]Comment, error)
+	GetByBlog( blogID string, page, limit int) ( []*Comment, error)
 	Update(comment *Comment) error 
 	Delete(id string) error 
 }

@@ -45,6 +45,8 @@ type BlogRepositary interface {
 	IncrementDislikeCount(blogID string) error
 	DecrementLikeCount(blogID string) error
 	DecrementDislikeCount(blogID string) error
+	IncrementCommentCount(blogID string) error
+	DecrementCommentCount(blogID string) error 
 	
 
 }
