@@ -19,7 +19,7 @@ type BlogRepo struct{
 
 func NewBlogRepo(coll *mongo.Collection) usecase.IBlogRepo {
 	ctx := context.Background()
-	return &IBlogRepo{
+	return &BlogRepo{
 		collection: coll,
 		context: ctx,
 	}
@@ -56,6 +56,32 @@ func (b *BlogRepo) ViewBlogByID(blogID primitive.ObjectID) *domain.Blog{
 	}
 	return &result
 }
+func (b *BlogRepo) GetByAuthor(author string, skip, limit int) ([]*domain.Blog, error) {
+    ctx := context.Background()
+    filter := bson.M{"author_name": primitive.Regex{Pattern: author, Options: "i"}}
+    opts := options.Find().
+        SetSkip(int64(skip)).
+        SetLimit(int64(limit))
+    
+    cursor, err := b.collection.Find(ctx, filter, opts)
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+    
+    var blogs []*domain.Blog
+    if err = cursor.All(ctx, &blogs); err != nil {
+        return nil, err
+    }
+    
+    return blogs, nil
+}
+
+
+
+
+
+
 func (b *BlogRepo) UpdateBlog(id primitive.ObjectID, updatedBlog *domain.Blog) error{
 	filter := bson.M{"_id":id}
 	updated := bson.M{
@@ -84,110 +110,57 @@ func (b *BlogRepo) DeleteBlog(id primitive.ObjectID) error{
 	return err
 }
 
-
-// on this part, i have just make naming modifications inorder to be consistent. so , you can just focus on the implementation.
-
-
 func (b *BlogRepo) List(page, limit int, filter domain.BlogFilter) ([]*domain.Blog, int64, error) {
-	// Build filter query
-	query := bson.M{}
-	
-	if filter.Search != "" {
-		query["$or"] = bson.A{
-			bson.M{"title": primitive.Regex{Pattern: filter.Search, Options: "i"}},
-			bson.M{"author_name": primitive.Regex{Pattern: filter.Search, Options: "i"}},
-		}
-	}
-	
-	if filter.Author != "" {
-		query["author_name"] = primitive.Regex{Pattern: filter.Author, Options: "i"}
-	}
-	
-	if len(filter.Tags) > 0 {
-		query["tags"] = bson.M{"$all": filter.Tags}
-	}
-	
-	if !filter.StartDate.IsZero() && !filter.EndDate.IsZero() {
-		query["created_at"] = bson.M{
-			"$gte": filter.StartDate,
-			"$lte": filter.EndDate,
-		}
-	}
-	
-	// Sorting
-	sortOption := -1 // default descending
-	if filter.SortOrder == "asc" {
-		sortOption = 1
-	}
-	
-	sort := bson.D{{Key: filter.SortBy, Value: sortOption}}
-	
-	// Pagination options
-	opts := options.Find().
-		SetSort(sort).
-		SetSkip(int64((page - 1) * limit)).
-		SetLimit(int64(limit))
-	
-	// Get total count
-	total, err := b.collection.CountDocuments(context.Background(), query)
-	if err != nil {
-		return nil, 0, err
-	}
-	
-	// Find documents
-	cursor, err := b.collection.Find(context.Background(), query, opts)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer cursor.Close(context.Background())
-	
-	var blogs []*domain.Blog
-	if err = cursor.All(context.Background(), &blogs); err != nil {
-		return nil, 0, err
-	}
-	
-	return blogs, total, nil
-}
-
-func (b *BlogRepo) IncrementViewCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.views", 1)
-}
-
-func (b *BlogRepo) IncrementLikeCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.likes", 1)
-}
-
-func (b *BlogRepo) IncrementDislikeCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.dislikes", 1)
-}
-
-func (b *BlogRepo) DecrementLikeCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.likes", -1)
-}
-
-func (b *BlogRepo) DecrementDislikeCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.dislikes", -1)
-}
-
-func (b *BlogRepo) IncrementCommentCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.comments", 1)
-}
-
-func (b *BlogRepo) DecrementCommentCount(blogID string) error {
-	return b.updateCounter(blogID, "stats.comments", -1)
-}
-
-// Helper function for atomic counter updates
-func (b *BlogRepo) updateCounter(blogID, field string, value int) error {
-	objID, err := primitive.ObjectIDFromHex(blogID)
-	if err != nil {
-		return err
-	}
-	
-	_, err = b.collection.UpdateByID(
-		context.Background(),
-		objID,
-		bson.M{"$inc": bson.M{field: value}},
-	)
-	return err
+    // Create basic query
+    query := bson.M{}
+    
+    // Add search filter if provided
+    if filter.Search != "" {
+        query["$or"] = []bson.M{
+            {"title": bson.M{"$regex": filter.Search, "$options": "i"}},
+            {"author_name": bson.M{"$regex": filter.Search, "$options": "i"}},
+        }
+    }
+    
+    // Add tags filter if provided
+    if len(filter.Tag) > 0 {
+        query["tags"] = bson.M{"$all": filter.Tag}
+    }
+    
+    // Set default sort options
+    sortField := "created_at"
+    sortOrder := -1  // descending by default
+    
+    // Apply custom sort if requested
+    if filter.SortBy == "popularity" {
+        sortField = "stats.views"
+    } else if filter.SortBy != "" {
+        sortField = filter.SortBy
+    }
+    
+    // Create options
+    opts := options.Find().
+        SetSort(bson.D{{Key: sortField, Value: sortOrder}}).
+        SetSkip(int64((page - 1) * limit)).
+        SetLimit(int64(limit))
+    
+    // Get total count
+    total, err := b.collection.CountDocuments(context.TODO(), query)
+    if err != nil {
+        return nil, 0, err
+    }
+    
+    // Find documents
+    cursor, err := b.collection.Find(context.TODO(), query, opts)
+    if err != nil {
+        return nil, 0, err
+    }
+    
+    // Decode results
+    var blogs []*domain.Blog
+    if err = cursor.All(context.TODO(), &blogs); err != nil {
+        return nil, 0, err
+    }
+    
+    return blogs, total, nil
 }

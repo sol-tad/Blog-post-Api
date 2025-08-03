@@ -55,8 +55,8 @@ type BlogRepositary interface {
 type BlogFilter struct {
 	Search  	string
 	 Author 	string
-	 Tag    	string 
-	 StratDate  time.Time 
+	 Tag    	[]string 
+	 StartDate  time.Time 
 	 EndDate    time.Time
 	  SortBy    string
 	  SortOrder string  // "asc" or "dsc"

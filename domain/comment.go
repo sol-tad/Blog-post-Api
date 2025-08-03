@@ -25,4 +25,6 @@ type CommentRepository interface {
 	GetByBlog( blogID string, page, limit int) ( []*Comment, error)
 	Update(comment *Comment) error 
 	Delete(id string) error 
+	IncrementCommentCount(id string) error
+	DecrementCommentCount(id string) error
 }
