@@ -9,6 +9,7 @@ func SetupRouter() *gin.Engine{
 	
 	 // user routes
     SetupUserRoutes(router)
+	
 
 
 	// blog routes
