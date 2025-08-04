@@ -26,7 +26,7 @@ func (uc *CommentUsecase) CreateComment(comment *domain.Comment) error {
     comment.UpdatedAt = time.Now()
     
     // Increment blog comment count
-    if err := uc.blogRepo.IncrementCommentCount(comment.BlogID.Hex()); err != nil {
+    if err := uc.commentRepo.IncrementCommentCount(comment.BlogID.Hex()); err != nil {
         return err
     }
     
@@ -52,7 +52,7 @@ func (uc *CommentUsecase) DeleteComment(id string) error {
         return err
     }
     // Decrement blog comment count
-    if err := uc.blogRepo.DecrementCommentCount(comment.BlogID.Hex()); err != nil {
+    if err := uc.commentRepo.DecrementCommentCount(comment.BlogID.Hex()); err != nil {
         return err
     }
     

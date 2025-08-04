@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -9,96 +10,163 @@ import (
 	"github.com/sol-tad/Blog-post-Api/usecase"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-type BlogController struct{
-	BlogUseCase *usecase.BlogUseCase
+
+type BlogController struct {
+	BlogUsecase *usecase.BlogUseCase
 }
 
-func NewBlogController (blog *usecase.BlogUseCase) *BlogController{
+func NewBlogController(blogUsecase *usecase.BlogUseCase) *BlogController {
 	return &BlogController{
-		BlogUseCase: blog,
+		BlogUsecase: blogUsecase,
 	}
 }
 
-type BlogDTO struct{
-	ID 		primitive.ObjectID  `json:"id"`
-	Title   string 				`json:"title"`
-	Content string 				`json:"content"`
-	Tags    []string 			`json:"tags"`
-	AuthorID primitive.ObjectID `json:"author_id"`
-	AuthorName string           `json:"author_name"`
-	CreatedAt   time.Time       `json:"created_at"`
-	UpdatedAt  time.Time        `json:"updated_at"`
-	Stats     domain.BlogStats  `json:"stats"`
-}
-func (bc *BlogController) ChangeToBlog(blogDTO BlogDTO) *domain.Blog{
-	var domBlog domain.Blog
-	domBlog.Content = blogDTO.Content
-	domBlog.ID = blogDTO.ID
-	domBlog.Title = blogDTO.Title
-	domBlog.Tags = blogDTO.Tags
-	domBlog.CreatedAt = blogDTO.CreatedAt
-	domBlog.UpdatedAt = blogDTO.UpdatedAt
-	domBlog.AuthorID = blogDTO.AuthorID
-	domBlog.AuthorName = blogDTO.AuthorName
-	domBlog.Stats = blogDTO.Stats
+func (bc *BlogController) CreateBlog(c *gin.Context) {
+	var blog domain.Blog
+	if err := c.ShouldBindJSON(&blog); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get author from context
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
 	
-	return &domBlog
-}
-
-
-func (bc *BlogController) CreateBlogController (ctx *gin.Context){
-	var newBlog BlogDTO
-	if err := ctx.ShouldBindJSON(&newBlog); err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	blog := bc.ChangeToBlog(newBlog)
-	bc.BlogUseCase.CreateBlog(blog)
-	ctx.JSON(http.StatusOK, gin.H{"message": "blog created successfully"})
-	
-}
-
-func (bc *BlogController) ViewBlogsController(ctx *gin.Context){
-	blogs := bc.BlogUseCase.ViewBlogs()
-	if len(blogs) == 0{
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"message": "No blogs found"})
-		return
-	}
-	ctx.IndentedJSON(http.StatusOK, blogs)
-}
-func (bc *BlogController) ViewBlogByIDController(ctx *gin.Context){
-	id := ctx.Param("id")
-	blog := bc.BlogUseCase.ViewBlogByID(id)
-	ctx.IndentedJSON(200 , blog)
- }
-func (bc *BlogController) UpdateBlogController(ctx *gin.Context){
-	id := ctx.Param("id")
-	var updatedBlog BlogDTO
-	if err := ctx.ShouldBindJSON(&updatedBlog); err != nil{
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	domainUpdatedBlog := bc.ChangeToBlog(updatedBlog)
-	err := bc.BlogUseCase.UpdateBlog(id , domainUpdatedBlog)
-		if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Blog updated successfully"})
-}
-
-func (bc *BlogController) DeleteBlogController(ctx *gin.Context) {
-	id := ctx.Param("id")
-	err := bc.BlogUseCase.DeleteBlog(id)
+	objID, err := primitive.ObjectIDFromHex(userID.(string))
 	if err != nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
-	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Blog deleted successfully"})
+	
+	blog.AuthorID = objID
+	blog.AuthorName = c.GetString("username")
+	blog.CreatedAt = time.Now()
+	blog.UpdatedAt = time.Now()
+
+	if err := bc.BlogUsecase.CreateBlog(&blog); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, blog)
+}
+
+func (bc *BlogController) GetBlog(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing blog ID"})
+		return
+	}
+
+	blog := bc.BlogUsecase.ViewBlogByID(id) // If your function requires userID, pass it properly or "" if not needed.
+	if blog == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Blog not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, blog)
 }
 
 
+func (bc *BlogController) UpdateBlog(c *gin.Context) {
+	id := c.Param("id")
+	
+	var updatedBlog domain.Blog
+	if err := c.ShouldBindJSON(&updatedBlog); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	
+	// Get existing blog
+	existingBlog:= bc.BlogUsecase.ViewBlogByID(id)
+	if existingBlog== nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "blog not found"})
+		return
+	}
+	
+	// Verify ownership
+	userID := c.GetString("user_id")
+	if existingBlog.AuthorID.Hex() != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own blogs"})
+		return
+	}
+	
+	// Update allowed fields
+	existingBlog.Title = updatedBlog.Title
+	existingBlog.Content = updatedBlog.Content
+	existingBlog.Tags = updatedBlog.Tags
+	existingBlog.UpdatedAt = time.Now()
+	
+	if err := bc.BlogUsecase.UpdateBlog(id,existingBlog); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	
+	c.JSON(http.StatusOK, existingBlog)
+}
 
-// add the controllers for your additional endpoints here.
+func (bc *BlogController) DeleteBlog(c *gin.Context) {
+	id := c.Param("id")
+	
+	// Get existing blog
+	blog := bc.BlogUsecase.ViewBlogByID(id)
+	if blog == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "blog not found"})
+		return
+	}
+	
+	// Verify ownership or admin role
+	userID := c.GetString("user_id")
+	userRole := c.GetString("user_role")
+	
+	if blog.AuthorID.Hex() != userID && userRole != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "you are not authorized to delete this blog"})
+		return
+	}
+	
+	if err := bc.BlogUsecase.DeleteBlog(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"message": "Blog deleted successfully"})
+}
 
+func (bc *BlogController) ListBlogs(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	
+	filter := domain.BlogFilter{
+		Search:    c.Query("search"),
+		Author:    c.Query("author"),
+		Tag:      c.QueryArray("tag"),
+		SortBy:    c.DefaultQuery("sort_by", "created_at"),
+		SortOrder: c.DefaultQuery("sort_order", "desc"),
+	}
+	
+	// Parse date filters
+	if startDate := c.Query("start_date"); startDate != "" {
+		filter.StartDate, _ = time.Parse(time.RFC3339, startDate)
+	}
+	if endDate := c.Query("end_date"); endDate != "" {
+		filter.EndDate, _ = time.Parse(time.RFC3339, endDate)
+	}
+	
+	blogs, total, err := bc.BlogUsecase.ListBlogs(page, limit, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch blogs"})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"data": blogs,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+			"total": total,
+		},
+	})
+}

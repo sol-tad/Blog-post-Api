@@ -22,7 +22,7 @@ func NewInteractionUsecase(InteractionRepo domain.InteractionRepository) *Intera
 // TRACK THE BLOG VIEW 
 func (b *BlogUseCase) TrackView(blogID string){
  
-	go b.Repo.IncrementViewCount(blogID)
+	go b.InteractionRepo.IncrementViewCount(blogID)
 }
 
 // LIKE AND DISLIKE FUNCTIONALITIES 
