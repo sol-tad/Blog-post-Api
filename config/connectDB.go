@@ -12,6 +12,8 @@ import (
 
 var UserCollection *mongo.Collection
 var BlogCollection *mongo.Collection
+var CommentCollection *mongo.Collection
+var InteractionCollection *mongo.Collection
 
 func ConnectDB(){
     MONGODB_URI := os.Getenv("MONGODB_URI")
@@ -27,6 +29,8 @@ func ConnectDB(){
 	}
 	UserCollection=client.Database("blogDB").Collection("users")
 	BlogCollection=client.Database("blogDB").Collection("blogs")
+	CommentCollection = client.Database("blogDB").Collection("comments")
+	InteractionCollection = client.Database("blogDB").Collection("interactions")
 	log.Println("Connected to MongoDB")
 
 }

@@ -21,7 +21,7 @@ func NewBlogUseCase(repo IBlogRepo, interactionRepo domain.InteractionRepository
 }
 
 
-func (b *BlogUseCase) CreateBlog(blog *domain.Blog) {
+func (b *BlogUseCase) CreateBlog(blog *domain.Blog) error {
 	blog.CreatedAt = time.Now()
 	blog.UpdatedAt = time.Now()
 	blog.Stats = domain.BlogStats{
@@ -33,9 +33,10 @@ func (b *BlogUseCase) CreateBlog(blog *domain.Blog) {
 	err := b.Repo.StoreBlog(blog)
 	if err != nil {
 		fmt.Println("blog insertion failed")
-		return
+		return err
 	}
 	fmt.Println("Inserted a blog")
+	return nil
 
 }
 
@@ -50,6 +51,15 @@ func (b *BlogUseCase) ViewBlogByID(blogID string)*domain.Blog{
 
 	return result
 }
+func (b *BlogUseCase) GetBlogByAuthor(author string, page, limit int) ([]*domain.Blog, error){
+	 if page < 1 {page = 1}
+	 if limit <1 || limit > 50 {limit = 10}
+	 skip := (page - 1) * 10
+	 return b.Repo.GetByAuthor(author, skip, limit)
+
+
+}
+
 func (b *BlogUseCase) ViewBlogs() []domain.Blog{
 	return b.Repo.RetriveAll()
 }
@@ -85,6 +95,3 @@ func (b *BlogUseCase) ListBlogs(page, limit int, filter domain.BlogFilter) ([]*d
 	
 	return b.Repo.List(page, limit, filter)
 }
-
-
-
