@@ -19,7 +19,7 @@ type BlogRepo struct{
 
 func NewBlogRepo(coll *mongo.Collection) usecase.IBlogRepo {
 	ctx := context.Background()
-	return &IBlogRepo{
+	return &BlogRepo{
 		collection: coll,
 		context: ctx,
 	}
