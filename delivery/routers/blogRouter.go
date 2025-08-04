@@ -10,9 +10,11 @@ import (
 
 func SetupBlogRoutes(router *gin.Engine) {
 	blogDbCollection := config.BlogCollection
+	interactionDBCollection := config.InteractionCollection
 
 	blogRepository := repository.NewBlogRepo(blogDbCollection)
-	blogUseCase := usecase.NewBlogUseCase(blogRepository)
+	interactionRepository := repository.NewInteractionRepository(blogDbCollection, interactionDBCollection)
+	blogUseCase := usecase.NewBlogUseCase(blogRepository, interactionRepository)
 	blogController := controllers.NewBlogController(blogUseCase)
 
 	// endpoints: create, reterive, update,delete
