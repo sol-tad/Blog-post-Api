@@ -78,10 +78,6 @@ func (b *BlogRepo) GetByAuthor(author string, skip, limit int) ([]*domain.Blog, 
 }
 
 
-
-
-
-
 func (b *BlogRepo) UpdateBlog(id primitive.ObjectID, updatedBlog *domain.Blog) error{
 	filter := bson.M{"_id":id}
 	updated := bson.M{

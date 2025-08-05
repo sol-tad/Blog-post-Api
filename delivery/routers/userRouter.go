@@ -22,6 +22,7 @@ func SetupUserRoutes(router *gin.Engine) {
 
 	{
 		
+		
 		userRoutes.POST("/register",userController.Register)
 		userRoutes.POST("/verify-otp",userController.VerifyOTP)
 		userRoutes.POST("/login",userController.Login)

@@ -46,7 +46,7 @@ func (bc *BlogController) CreateBlog(c *gin.Context) {
 	blog.CreatedAt = time.Now()
 	blog.UpdatedAt = time.Now()
 
-	if err := bc.BlogUsecase.CreateBlog(&blog); err != nil {
+	if err := bc.BlogUsecase.StoreBlog(&blog); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

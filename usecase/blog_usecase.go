@@ -21,7 +21,7 @@ func NewBlogUseCase(repo IBlogRepo, interactionRepo domain.InteractionRepository
 }
 
 
-func (b *BlogUseCase) CreateBlog(blog *domain.Blog) error {
+func (b *BlogUseCase) StoreBlog(blog *domain.Blog) error {
 	blog.CreatedAt = time.Now()
 	blog.UpdatedAt = time.Now()
 	blog.Stats = domain.BlogStats{
