@@ -11,9 +11,8 @@ type IBlogRepo interface {
 	ViewBlogByID(blogID primitive.ObjectID) *domain.Blog
 	UpdateBlog(id primitive.ObjectID, updatedTask *domain.Blog) error
 	DeleteBlog(id primitive.ObjectID) error
-
-	List(page, limit int, filter domain.BlogFilter) ([]*domain.Blog, int64, error)
-	
+	GetByAuthor(author string, skip, limit int) ([]*domain.Blog, error)
+	List(page, limit int, filter domain.BlogFilter) ([]*domain.Blog, int64, error)	
 
 }
 

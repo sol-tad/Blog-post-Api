@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sol-tad/Blog-post-Api/config"
 	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
-	"github.com/sol-tad/Blog-post-Api/middleware"
+	"github.com/sol-tad/Blog-post-Api/middlewares"
 	"github.com/sol-tad/Blog-post-Api/repository"
 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
@@ -21,7 +21,7 @@ func SetupCommentRoutes(router *gin.Engine) {
 		
 		// Protected routes
 		protected := commentRoutes.Group("")
-		protected.Use(middleware.AuthMiddleware())
+		protected.Use(middlewares.AuthMiddleware())
 		{
 			protected.POST("", commentController.CreateComment)
 			protected.PUT("/:id", commentController.UpdateComment)
