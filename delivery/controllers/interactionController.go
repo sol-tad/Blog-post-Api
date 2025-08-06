@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,13 +21,18 @@ func NewInteractionController(interactionUsecase *usecase.InteractionUsecase) *I
 
 func (ic *InteractionController) LikeBlog(c *gin.Context) {
 	blogID := c.Param("id")
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
-		return
-	}
+	// userID, exists := c.Get("id")
 
-	objID, err := primitive.ObjectIDFromHex(userID.(string))
+	userID := c.GetString("id")
+	log.Println("id============:", userID)
+
+
+	// if !exists {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+	// 	return
+	// }
+
+	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return

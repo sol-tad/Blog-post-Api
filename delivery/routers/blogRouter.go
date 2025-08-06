@@ -28,7 +28,7 @@ func SetupBlogRoutes(router *gin.Engine) {
 		protected := blogRoutes.Group("")
 		protected.Use(middlewares.AuthMiddleware())
 		{
-			protected.POST("", blogController.CreateBlog)
+			protected.POST("/create", blogController.CreateBlog)
 			protected.PUT("/:id", blogController.UpdateBlog)
 			protected.DELETE("/:id", blogController.DeleteBlog)
 		}

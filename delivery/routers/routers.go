@@ -9,6 +9,8 @@ func SetupRouter() *gin.Engine{
 	
 	 // user routes
     SetupUserRoutes(router)
+
+	SetupInteractionRoutes(router)
 	
 
 
