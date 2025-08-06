@@ -92,7 +92,7 @@ func (bc *BlogController) UpdateBlog(c *gin.Context) {
 	}
 	
 	// Verify ownership
-	userID := c.GetString("user_id")
+	userID := c.GetString("id")
 	if existingBlog.AuthorID.Hex() != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own blogs"})
 		return
@@ -123,8 +123,8 @@ func (bc *BlogController) DeleteBlog(c *gin.Context) {
 	}
 	
 	// Verify ownership or admin role
-	userID := c.GetString("user_id")
-	userRole := c.GetString("user_role")
+	userID := c.GetString("id")
+	userRole := c.GetString("role")
 	
 	if blog.AuthorID.Hex() != userID && userRole != "admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you are not authorized to delete this blog"})

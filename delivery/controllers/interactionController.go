@@ -47,7 +47,7 @@ func (ic *InteractionController) LikeBlog(c *gin.Context) {
 
 func (ic *InteractionController) UnlikeBlog(c *gin.Context) {
 	blogID := c.Param("id")
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
@@ -68,7 +68,7 @@ func (ic *InteractionController) UnlikeBlog(c *gin.Context) {
 
 func (ic *InteractionController) DislikeBlog(c *gin.Context) {
 	blogID := c.Param("id")
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
@@ -89,7 +89,7 @@ func (ic *InteractionController) DislikeBlog(c *gin.Context) {
 
 func (ic *InteractionController) UndoDislike(c *gin.Context) {
 	blogID := c.Param("id")
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
