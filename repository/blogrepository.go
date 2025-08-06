@@ -25,9 +25,17 @@ func NewBlogRepo(coll *mongo.Collection) usecase.IBlogRepo {
 	}
 }
 
-func (b *BlogRepo) StoreBlog (blog *domain.Blog)error{
-	_, err := b.collection.InsertOne(b.context, blog)
-	return err
+func (b *BlogRepo) StoreBlog(blog *domain.Blog) error {
+    result, err := b.collection.InsertOne(b.context, blog)
+    if err != nil {
+        return err
+    }
+
+    if oid, ok := result.InsertedID.(primitive.ObjectID); ok {
+        blog.ID = oid
+    }
+
+    return nil
 }
 
 func (b *BlogRepo) RetriveAll ()[]domain.Blog{

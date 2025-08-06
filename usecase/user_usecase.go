@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	// "log"
 	"math/rand"
 
 	"github.com/sol-tad/Blog-post-Api/domain"
@@ -58,7 +58,7 @@ func (uuc *UserUsecase) VerifyOTP(ctx context.Context, email, otp string) error 
 
 func (uuc *UserUsecase) Login(ctx context.Context, username, password string)(accessToken string, refreshToken string, err error) {
 	user, err := uuc.UserRepository.Login(ctx, username)
-	log.Println("USER&&&&&&&&&&&&&&&",user)
+	// log.Println("USER&&&&&&&&&&&&&&&",user)
 	if err != nil {
 		return "", "", errors.New("invalid username or password")
 	}

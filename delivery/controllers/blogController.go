@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -29,7 +30,10 @@ func (bc *BlogController) CreateBlog(c *gin.Context) {
 	}
 
 	// Get author from context
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("id")
+
+	// Log the user ID to the console
+	fmt.Println("User ID:------------------------------------", userID)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
