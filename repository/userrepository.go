@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepositoryImpl struct {
@@ -90,7 +91,6 @@ func (ur *UserRepositoryImpl) VerifyRefreshToken(ctx context.Context, userID str
 
     return true, nil
 }
-
 
 
 func (ur *UserRepositoryImpl) DeleteRefreshToken(ctx context.Context, userID string) error {
@@ -189,4 +189,24 @@ func (ur *UserRepositoryImpl) UpdateProfile(ctx context.Context, userID string, 
 	}
 
 	return ur.FindByID(ctx, userID)
+}
+
+//oauth related repository methods
+
+func (ur *UserRepositoryImpl) FindByGoogleID(ctx context.Context, googleID string) (*domain.User, error) {
+	var user domain.User
+	err := ur.collection.FindOne(ctx, bson.M{"google_id": googleID}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (ur *UserRepositoryImpl) Save(ctx context.Context, user *domain.User) error {
+	filter:=bson.M{"google_id":user.GoogleID}
+	update:=bson.M{"$set":user}
+	opts:=options.Update().SetUpsert(true)
+	
+	_, err := ur.collection.UpdateOne(ctx, filter,update,opts)
+	return err
 }

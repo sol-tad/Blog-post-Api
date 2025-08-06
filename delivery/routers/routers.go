@@ -12,6 +12,8 @@ func SetupRouter() *gin.Engine{
 
 	SetupInteractionRoutes(router)
 	
+	//oauth routes
+	SetupOAuthRouter(router)
 
 
 	// blog routes

@@ -8,6 +8,8 @@ import (
 
 type User struct {
 	ID       	primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	FullName   string             `json:"full_name,omitempty" bson:"full_name,omitempty"`
+	Picture    string             `json:"picture,omitempty" bson:"picture,omitempty"`
 	Username 	string 		   `json:"username" bson:"username" validate:"required,min=3,max=50"`	
 	Email      string             `bson:"email" json:"email"`
 	Password 	string `json:"password" bson:"password" validate:"required,min=6,max=50"`
@@ -19,6 +21,7 @@ type User struct {
 	Bio           string             `json:"bio,omitempty" bson:"bio,omitempty"`
 	ProfilePicture string            `json:"profile_picture,omitempty" bson:"profile_picture,omitempty"`
 	ContactInfo   string             `json:"contact_info,omitempty" bson:"contact_info,omitempty"`
+	GoogleID       string             `json:"google_id,omitempty" bson:"google_id,omitempty"`
 
 }
 
@@ -35,6 +38,9 @@ type UserRepository interface {
 	VerifyResetOTP(ctx context.Context, email, otp string) error
 	UpdatePasswordByEmail(ctx context.Context, email, newHashedPassword string) error
 	UpdateProfile(ctx context.Context, userID string, updated User) (User, error)
+	
+	FindByGoogleID(ctx context.Context, googleID string) (*User, error)
+	Save(ctx context.Context, user *User) error
 
 
 	// PromoteUser(ctx context.Context, adminID string, targetUserID string) error
