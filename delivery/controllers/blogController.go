@@ -34,19 +34,31 @@ func (bc *BlogController) CreateBlog(c *gin.Context) {
 
 	// Log the user ID to the console
 	fmt.Println("User ID:------------------------------------", userID)
+	userID, exists = c.Get("id")
+
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
+
+	// userName, exists := c.Get("username")
+
+	// if !exists {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+	// 	return
+	// }
+
+
 	
 	objID, err := primitive.ObjectIDFromHex(userID.(string))
+	
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
 		return
 	}
 	
 	blog.AuthorID = objID
-	blog.AuthorName = c.GetString("username")
+
 	blog.CreatedAt = time.Now()
 	blog.UpdatedAt = time.Now()
 
