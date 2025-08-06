@@ -29,7 +29,7 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 	}
 	
 	// Set user information
-	userID, exists := c.Get("user_id")
+	userID, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
@@ -101,7 +101,7 @@ func (cc *CommentController) UpdateComment(c *gin.Context) {
 	}
 	
 	// Verify ownership
-	userID := c.GetString("user_id")
+	userID := c.GetString("id")
 	if comment.UserID.Hex() != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own comments"})
 		return
@@ -130,8 +130,8 @@ func (cc *CommentController) DeleteComment(c *gin.Context) {
 	}
 	
 	// Verify ownership or admin role
-	userID := c.GetString("user_id")
-	userRole := c.GetString("user_role")
+	userID := c.GetString("id")
+	userRole := c.GetString("role")
 	
 	if comment.UserID.Hex() != userID && userRole != "admin" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you are not authorized to delete this comment"})
