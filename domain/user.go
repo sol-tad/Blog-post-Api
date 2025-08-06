@@ -41,7 +41,7 @@ type UserRepository interface {
 	
 	FindByGoogleID(ctx context.Context, googleID string) (*User, error)
 	Save(ctx context.Context, user *User) error
-
+	GetByID( userID primitive.ObjectID) *User
 
 	// PromoteUser(ctx context.Context, adminID string, targetUserID string) error
 	// DemoteUser(ctx context.Context, adminID string, targetUserID string) error

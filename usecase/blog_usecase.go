@@ -11,12 +11,14 @@ import (
 type BlogUseCase struct {
 	Repo IBlogRepo
 	InteractionRepo domain.InteractionRepository
+	UserRepo domain.UserRepository
 }
 
-func NewBlogUseCase(repo IBlogRepo, interactionRepo domain.InteractionRepository) *BlogUseCase {
+func NewBlogUseCase(repo IBlogRepo, interactionRepo domain.InteractionRepository,urepo domain.UserRepository) *BlogUseCase {
 	return &BlogUseCase{
 		Repo: repo,
 		InteractionRepo: interactionRepo,
+		UserRepo: urepo,
 	}
 }
 
@@ -30,6 +32,8 @@ func (b *BlogUseCase) StoreBlog(blog *domain.Blog) error {
 		Dislikes: 0,
 		Comments: 0,
 	}
+	author := b.UserRepo.GetByID(blog.AuthorID)
+	blog.AuthorName = author.Username
 	err := b.Repo.StoreBlog(blog)
 	if err != nil {
 		fmt.Println("blog insertion failed")

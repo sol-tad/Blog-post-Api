@@ -11,12 +11,13 @@ import (
 
 func SetupBlogRoutes(router *gin.Engine) {
 	blogRepo := repository.NewBlogRepo(config.BlogCollection)
+	userRepo:=repository.NewUserRepository(config.UserCollection)
 	interactionRepo := repository.NewInteractionRepository(
 		config.BlogCollection, 
 		config.InteractionCollection,
 	)
 	
-	blogUsecase := usecase.NewBlogUseCase(blogRepo, interactionRepo)
+	blogUsecase := usecase.NewBlogUseCase(blogRepo, interactionRepo,userRepo)
 	blogController := controllers.NewBlogController(blogUsecase)
 
 	blogRoutes := router.Group("/blogs")

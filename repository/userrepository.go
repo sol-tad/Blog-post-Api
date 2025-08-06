@@ -210,3 +210,16 @@ func (ur *UserRepositoryImpl) Save(ctx context.Context, user *domain.User) error
 	_, err := ur.collection.UpdateOne(ctx, filter,update,opts)
 	return err
 }
+
+
+func (ur *UserRepositoryImpl) GetByID( userID primitive.ObjectID) *domain.User{
+
+	var user domain.User
+	filter := bson.M{"_id":userID}
+	err := ur.collection.FindOne(context.Background(),filter).Decode(&user)
+	if err != nil{
+		return &domain.User{}
+	}
+
+	return &user
+}
