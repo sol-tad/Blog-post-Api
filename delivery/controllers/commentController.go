@@ -4,12 +4,11 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sol-tad/Blog-post-Api/domain"
 	"github.com/sol-tad/Blog-post-Api/usecase"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-)
+) 
 
 type CommentController struct {
 	CommentUsecase *usecase.CommentUsecase

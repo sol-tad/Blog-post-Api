@@ -18,5 +18,8 @@ func SetupRouter() *gin.Engine{
 
 	// blog routes
 	SetupBlogRoutes(router)
+
+	//ai routes
+	SetupAiRoutes(router)
 	return router
 }
