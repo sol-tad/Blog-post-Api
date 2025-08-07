@@ -3,7 +3,7 @@ package domain
 type GenerateBlogPostRequest struct {
 	Topic    string `json:"topic"`
 	Tone     string `json:"tone"`
-	Length   string `json:"lenght"`
+	Length   string `json:"length"`
 	Audience string `json:"audience"`
 }
 
@@ -21,4 +21,5 @@ type AIUsecase interface {
 	ImproveBlogPost(input ImproveBlogPostRequest) (string, error)
 	SuggestBlogImprovement(content string) ([]string, error)
 	SummarizeBlog(content string)(string,error)
+	GenerateMetadata(content string)(map[string]string, error)
 }

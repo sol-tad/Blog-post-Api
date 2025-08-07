@@ -10,13 +10,20 @@ func SetupRouter() *gin.Engine{
 	 // user routes
     SetupUserRoutes(router)
 
+	//ai router
+	SetupAIRoutes(router)
+
+	//like router
 	SetupInteractionRoutes(router)
 	
 	//oauth routes
 	SetupOAuthRouter(router)
 
+	//comment router
+	// SetupCommentRoutes(router)
 
 	// blog routes
 	SetupBlogRoutes(router)
+	
 	return router
 }
