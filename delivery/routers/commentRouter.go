@@ -15,7 +15,7 @@ func SetupCommentRoutes(router *gin.Engine) {
 	commentUsecase := usecase.NewCommentUsecase(commentRepo, blogRepo)
 	commentController := controllers.NewCommentController(commentUsecase)
 
-	commentRoutes := router.Group("/blogs/:blog_id/comments")
+	commentRoutes := router.Group("/blogs/comments/:blog_id/")
 	{
 		commentRoutes.GET("", commentController.GetComments)
 		
@@ -24,8 +24,8 @@ func SetupCommentRoutes(router *gin.Engine) {
 		protected.Use(middlewares.AuthMiddleware())
 		{
 			protected.POST("", commentController.CreateComment)
-			protected.PUT("/:id", commentController.UpdateComment)
-			protected.DELETE("/:id", commentController.DeleteComment)
+			protected.PUT("/:comment_id", commentController.UpdateComment)
+			protected.DELETE("/:comment_id", commentController.DeleteComment)
 		}
 	}
 }

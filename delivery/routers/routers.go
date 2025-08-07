@@ -20,7 +20,7 @@ func SetupRouter() *gin.Engine{
 	SetupOAuthRouter(router)
 
 	//comment router
-	// SetupCommentRoutes(router)
+	SetupCommentRoutes(router)
 
 	// blog routes
 	SetupBlogRoutes(router)

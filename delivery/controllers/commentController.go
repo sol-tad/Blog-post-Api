@@ -85,7 +85,7 @@ func (cc *CommentController) GetComments(c *gin.Context) {
 }
 
 func (cc *CommentController) UpdateComment(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("comment_id")
 	
 	var updatedComment domain.Comment
 	if err := c.ShouldBindJSON(&updatedComment); err != nil {
@@ -120,7 +120,7 @@ func (cc *CommentController) UpdateComment(c *gin.Context) {
 }
 
 func (cc *CommentController) DeleteComment(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("comment_id")
 	
 	// Get existing comment
 	comment, err := cc.CommentUsecase.GetCommentByID(id)
