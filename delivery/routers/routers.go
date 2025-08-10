@@ -2,33 +2,37 @@
 package routers
 
 import (
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 )
 
-// SetupRouter creates a new Gin engine and registers all route groups,
-// including user, AI, interaction (likes), OAuth, comment, and blog routes.
-// It returns the configured *gin.Engine ready to run.
-func SetupRouter() *gin.Engine{
-	router:=gin.Default()
-	
-	 // Register user-related routes
+// SetupRouter godoc
+// @title           Blog API
+// @version         1.0
+// @description     This is the Blog API documentation.
+// @host      localhost:8080
+// @BasePath  /api/v1
+func SetupRouter() *gin.Engine {
+    router := gin.Default()
+
+
+
+    // Register user-related routes
     SetupUserRoutes(router)
 
-	// Register AI-related routes
-	SetupAIRoutes(router) 
+    // Register AI-related routes
+    SetupAIRoutes(router)
 
-	// Register interaction (like) related routes
-	SetupInteractionRoutes(router)
-	
-	
-	// Register OAuth authentication routes
-	SetupOAuthRouter(router)
+    // Register interaction (like) related routes
+    SetupInteractionRoutes(router)
 
-	// Register comment-related routes
-	SetupCommentRoutes(router)
+    // Register OAuth authentication routes
+    SetupOAuthRouter(router)
 
-	// Register blog post related routes
-	SetupBlogRoutes(router)
-	
-	return router
+    // Register comment-related routes
+    SetupCommentRoutes(router)
+
+    // Register blog post related routes
+    SetupBlogRoutes(router)
+
+    return router
 }

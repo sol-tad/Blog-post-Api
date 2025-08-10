@@ -8,15 +8,31 @@ import (
 
 // UserInteraction represents a user's interaction with a blog post,
 // including likes, dislikes, and last view time.
+// swagger:model UserInteraction
 type UserInteraction struct {
-	BlogID     primitive.ObjectID `bson:"blog_id"`                 // ID of the blog post
-	UserID     primitive.ObjectID `bson:"user_id"`                 // ID of the user
-	Liked      bool               `bson:"liked,omitempty"`         // Whether the user liked the post
-	Disliked   bool               `bson:"disliked,omitempty"`      // Whether the user disliked the post
-	LastViewed time.Time          `bson:"last_viewed,omitempty"`   // Timestamp of the last time user viewed the post
+	// ID of the blog post
+	// example: 507f1f77bcf86cd799439011
+	BlogID primitive.ObjectID `bson:"blog_id"`
+
+	// ID of the user
+	// example: 507f1f77bcf86cd799439012
+	UserID primitive.ObjectID `bson:"user_id"`
+
+	// Whether the user liked the post
+	// example: true
+	Liked bool `bson:"liked,omitempty"`
+
+	// Whether the user disliked the post
+	// example: false
+	Disliked bool `bson:"disliked,omitempty"`
+
+	// Timestamp of the last time user viewed the post
+	// example: 2023-08-10T15:04:05Z07:00
+	LastViewed time.Time `bson:"last_viewed,omitempty"`
 }
 
 // InteractionRepository defines data operations related to user interactions with blogs.
+// No swagger annotations needed for interfaces
 type InteractionRepository interface {
 	RecordView(blogID string, userID primitive.ObjectID) error  // Record a view event for a blog by a user
 	AddLike(blogID string, userID primitive.ObjectID) error     // Add a like from a user to a blog

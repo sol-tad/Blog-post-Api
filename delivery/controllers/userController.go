@@ -27,12 +27,38 @@ type ResetPasswordRequest struct {
 	NewPassword string `json:"new_password" binding:"required,min=6,max=50"`
 }
 
+// VerifyOTPRequest defines payload for OTP verification
+type VerifyOTPRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	OTP   string `json:"otp" binding:"required"`
+}
+
+// LoginRequest defines payload for user login
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// RefreshTokenRequest defines payload for token refresh
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
 // NewUserController initializes a new UserController
 func NewUserController(userUsecase *usecase.UserUsecase) *UserController {
 	return &UserController{UserUsecase: userUsecase}
 }
 
-// Register handles user registration and sends OTP for email verification
+// Register godoc
+// @Summary Register a new user and send OTP for email verification
+// @Description Registers a new user and sends an OTP to verify email
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body domain.User true "User registration data"
+// @Success 200 {object} map[string]string "OTP sent to your email. Please verify."
+// @Failure 400 {object} map[string]string "Bad request error"
+// @Router /users/register [post]
 func (uc *UserController) Register(c *gin.Context) {
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -48,12 +74,18 @@ func (uc *UserController) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to your email. Please verify."})
 }
 
-// VerifyOTP confirms user's email using the OTP
+// VerifyOTP godoc
+// @Summary Verify email using OTP
+// @Description Verifies a user's email by OTP
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param input body VerifyOTPRequest true "Email and OTP"
+// @Success 200 {object} map[string]string "Account verified successfully!"
+// @Failure 400 {object} map[string]string "Verification failed or bad input"
+// @Router /users/verify-otp [post]
 func (uc *UserController) VerifyOTP(c *gin.Context) {
-	var input struct {
-		Email string `json:"email"`
-		OTP   string `json:"otp"`
-	}
+	var input VerifyOTPRequest
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -68,12 +100,19 @@ func (uc *UserController) VerifyOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Account verified successfully!"})
 }
 
-// Login authenticates the user and returns access and refresh tokens
+// Login godoc
+// @Summary Login user and return JWT tokens
+// @Description Authenticates user credentials and returns access and refresh tokens
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body LoginRequest true "User credentials"
+// @Success 200 {object} map[string]string "Access and refresh tokens"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Router /users/login [post]
 func (uc *UserController) Login(c *gin.Context) {
-	var req struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	var req LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -92,11 +131,19 @@ func (uc *UserController) Login(c *gin.Context) {
 	})
 }
 
-// RefreshTokenController issues a new access token using a valid refresh token
+// RefreshTokenController godoc
+// @Summary Refresh access token
+// @Description Generates a new access token using a valid refresh token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param token body RefreshTokenRequest true "Refresh token"
+// @Success 200 {object} map[string]string "New access token"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized - invalid token"
+// @Router /users/refresh-token [post]
 func (uc UserController) RefreshTokenController(c *gin.Context) {
-	var req struct {
-		RefreshToken string `json:"refresh_token"`
-	}
+	var req RefreshTokenRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,14 +152,22 @@ func (uc UserController) RefreshTokenController(c *gin.Context) {
 
 	token, err := uc.UserUsecase.RefreshToken(context.Background(), req.RefreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token*****"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
-// Logout invalidates the user's refresh token
+// Logout godoc
+// @Summary Logout user
+// @Description Invalidates user's refresh token to logout
+// @Tags users
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]string "Logged out successfully"
+// @Failure 500 {object} map[string]string "Logout failed"
+// @Router /users/logout [post]
 func (uc UserController) Logout(c *gin.Context) {
 	userID := c.GetString("id") // Extracted from middleware
 	log.Println("id============:", userID)
@@ -125,7 +180,17 @@ func (uc UserController) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 
-// SendResetOTP sends a password reset OTP to the user's email
+// SendResetOTP godoc
+// @Summary Send password reset OTP
+// @Description Sends a one-time password to user's email for password reset
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param email body ForgotPasswordRequest true "Email to send OTP"
+// @Success 200 {object} map[string]string "Reset OTP sent to your email address"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 500 {object} map[string]string "Failed to send reset OTP"
+// @Router /users/send-reset-otp [post]
 func (uc *UserController) SendResetOTP(c *gin.Context) {
 	var req ForgotPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -145,7 +210,16 @@ func (uc *UserController) SendResetOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Reset OTP sent to your email address"})
 }
 
-// ResetPassword verifies OTP and updates the user's password
+// ResetPassword godoc
+// @Summary Reset user password
+// @Description Verifies OTP and updates user's password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param resetRequest body ResetPasswordRequest true "Reset password details"
+// @Success 200 {object} map[string]string "Password reset successfully"
+// @Failure 400 {object} map[string]string "Invalid input or reset failed"
+// @Router /users/reset-password [post]
 func (uc *UserController) ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -162,7 +236,16 @@ func (uc *UserController) ResetPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
 
-// PromoteUser elevates a user's role to admin (requires admin privileges)
+// PromoteUser godoc
+// @Summary Promote user to admin
+// @Description Elevates a user's role to admin, requires admin privileges
+// @Tags users
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Target user ID"
+// @Success 200 {object} map[string]string "User promoted to admin"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Router /users/promote/{id} [post]
 func (uc *UserController) PromoteUser(c *gin.Context) {
 	adminID := c.GetString("id") // from middleware
 	targetID := c.Param("id")
@@ -174,7 +257,16 @@ func (uc *UserController) PromoteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin"})
 }
 
-// DemoteUser lowers a user's role to regular user (requires admin privileges)
+// DemoteUser godoc
+// @Summary Demote admin to regular user
+// @Description Lowers a user's role to regular user, requires admin privileges
+// @Tags users
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Target user ID"
+// @Success 200 {object} map[string]string "User demoted to regular user"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Router /users/demote/{id} [post]
 func (uc *UserController) DemoteUser(c *gin.Context) {
 	adminID := c.GetString("id") // from middleware
 	targetID := c.Param("id")
@@ -186,7 +278,18 @@ func (uc *UserController) DemoteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User demoted to regular user"})
 }
 
-// UpdateProfile modifies the user's profile information
+// UpdateProfile godoc
+// @Summary Update user profile
+// @Description Modifies the user's profile information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param user body domain.User true "Updated user profile data"
+// @Success 200 {object} domain.User "Updated user profile"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 500 {object} map[string]string "Failed to update profile"
+// @Router /users/profile [put]
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	userID := c.GetString("id") // from AuthMiddleware
 

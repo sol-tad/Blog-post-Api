@@ -21,7 +21,20 @@ func NewCommentController(commentUsecase *usecase.CommentUsecase) *CommentContro
 	return &CommentController{CommentUsecase: commentUsecase}
 }
 
-// CreateComment adds a new comment to a blog post
+// CreateComment godoc
+// @Summary Add a new comment to a blog post
+// @Description Create a comment on a blog post. Requires authentication.
+// @Tags Comments
+// @Accept json
+// @Produce json
+// @Param blog_id path string true "Blog ID"
+// @Param comment body domain.Comment true "Comment object"
+// @Success 201 {object} domain.Comment
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /blogs/{blog_id}/comments [post]
 func (cc *CommentController) CreateComment(c *gin.Context) {
 	var comment domain.Comment
 	if err := c.ShouldBindJSON(&comment); err != nil {
@@ -29,7 +42,6 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Extract user ID from context
 	userID, exists := c.Get("id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
@@ -42,7 +54,6 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 		return
 	}
 
-	// Set user and blog metadata
 	comment.UserID = objID
 	comment.Username = c.GetString("username")
 	comment.CreatedAt = time.Now()
@@ -56,7 +67,6 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 	}
 	comment.BlogID = blogObjID
 
-	// Save comment
 	if err := cc.CommentUsecase.CreateComment(&comment); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -65,7 +75,17 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 	c.JSON(http.StatusCreated, comment)
 }
 
-// GetComments retrieves paginated comments for a specific blog post
+// GetComments godoc
+// @Summary Get paginated comments for a blog post
+// @Description Retrieve comments with pagination for a specific blog post
+// @Tags Comments
+// @Produce json
+// @Param blog_id path string true "Blog ID"
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Number of comments per page" default(10)
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Router /blogs/{blog_id}/comments [get]
 func (cc *CommentController) GetComments(c *gin.Context) {
 	blogID := c.Param("blog_id")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -86,7 +106,21 @@ func (cc *CommentController) GetComments(c *gin.Context) {
 	})
 }
 
-// UpdateComment modifies an existing comment if the user is the owner
+// UpdateComment godoc
+// @Summary Update an existing comment
+// @Description Update a comment if the user is the owner
+// @Tags Comments
+// @Accept json
+// @Produce json
+// @Param comment_id path string true "Comment ID"
+// @Param comment body domain.Comment true "Updated comment content"
+// @Success 200 {object} domain.Comment
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /comments/{comment_id} [put]
 func (cc *CommentController) UpdateComment(c *gin.Context) {
 	id := c.Param("comment_id")
 
@@ -96,21 +130,18 @@ func (cc *CommentController) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Retrieve existing comment
 	comment, err := cc.CommentUsecase.GetCommentByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
 		return
 	}
 
-	// Verify ownership
 	userID := c.GetString("id")
 	if comment.UserID.Hex() != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only update your own comments"})
 		return
 	}
 
-	// Apply update
 	comment.Content = updatedComment.Content
 	comment.UpdatedAt = time.Now()
 
@@ -122,18 +153,27 @@ func (cc *CommentController) UpdateComment(c *gin.Context) {
 	c.JSON(http.StatusOK, comment)
 }
 
-// DeleteComment removes a comment if the user is the owner or an admin
+// DeleteComment godoc
+// @Summary Delete a comment
+// @Description Delete a comment if the user is the owner or admin
+// @Tags Comments
+// @Produce json
+// @Param comment_id path string true "Comment ID"
+// @Success 200 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /comments/{comment_id} [delete]
 func (cc *CommentController) DeleteComment(c *gin.Context) {
 	id := c.Param("comment_id")
 
-	// Retrieve existing comment
 	comment, err := cc.CommentUsecase.GetCommentByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
 		return
 	}
 
-	// Verify ownership or admin role
 	userID := c.GetString("id")
 	userRole := c.GetString("role")
 
@@ -142,7 +182,6 @@ func (cc *CommentController) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Delete comment
 	if err := cc.CommentUsecase.DeleteComment(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

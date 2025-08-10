@@ -21,7 +21,13 @@ func NewOAuthController(oauthUsecase *usecase.OAuthUsecase) *OAuthController {
 	}
 }
 
-// Login redirects the user to Google's OAuth consent screen
+// Login godoc
+// @Summary Redirect to Google OAuth consent screen
+// @Description Redirects user to Google's OAuth 2.0 authorization page
+// @Tags auth
+// @Produce json
+// @Success 307 "Redirect to Google OAuth consent screen"
+// @Router /auth/google/login [get]
 func (oauc *OAuthController) Login(c *gin.Context) {
 	// Generate OAuth URL with a state parameter
 	url := config.GoogleOAuthConfig.AuthCodeURL("state_value")
@@ -30,7 +36,16 @@ func (oauc *OAuthController) Login(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-// Callback handles the OAuth redirect from Google and completes login
+// Callback godoc
+// @Summary Handle Google OAuth callback
+// @Description Handles OAuth callback, exchanges code for tokens and user info
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param code query string true "Authorization code from Google"
+// @Success 200 {object} map[string]interface{} "OAuth login successful with user info and tokens"
+// @Failure 400 {object} map[string]string "OAuth failed"
+// @Router /auth/google/callback [get]
 func (oauc *OAuthController) Callback(c *gin.Context) {
 	// Extract authorization code from query parameters
 	code := c.Query("code")

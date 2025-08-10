@@ -5,12 +5,9 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	// "github.com/sol-tad/Blog-post-Api/config"
 	"github.com/sol-tad/Blog-post-Api/delivery/controllers"
 	"github.com/sol-tad/Blog-post-Api/infrastructure"
 	"github.com/sol-tad/Blog-post-Api/middlewares"
-
-	// "github.com/sol-tad/Blog-post-Api/repository"
 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
@@ -18,36 +15,80 @@ import (
 // initializing the AI service with API key, use case, and controller,
 // then setting up authenticated endpoints for AI-powered blog operations.
 func SetupAIRoutes(router *gin.Engine) {
-	// Load the Gemini API key from environment variables
 	geminiApiKey := os.Getenv("GEMINI_API_KEY")
 	log.Printf("------********************** %s  %s", geminiApiKey, "-------------------||")
 
-	// Initialize Gemini AI service with the API key
 	gemini, _ := infrastructure.NewGeminiService(geminiApiKey)
-
-	// Create AI use case with the Gemini service
 	aiUsecase := usecase.NewAIUsecase(gemini)
-
-	// Initialize AI controller with the use case
 	aiController := controllers.NewAIController(aiUsecase)
 
-	// Group routes under /ai/posts for AI-related blog post endpoints
 	AIRoutes := router.Group("/ai/posts")
-
 	{
-		// Protected route to generate a new blog post using AI
+		// @Summary      Generate AI-powered blog post
+		// @Description  Generates a new blog post using AI based on provided prompt.
+		// @Tags         AI
+		// @Security     BearerAuth
+		// @Accept       json
+		// @Produce      json
+		// @Param        request body      map[string]interface{} true "Prompt data"
+		// @Success      201  {object}  map[string]interface{}
+		// @Failure      400  {object}  map[string]string
+		// @Failure      401  {object}  map[string]string
+		// @Router       /ai/posts/generate [post]
 		AIRoutes.POST("generate", middlewares.AuthMiddleware(), aiController.GenerateBlogPost)
 
-		// Protected route to improve an existing blog post by ID
+		// @Summary      Improve blog post
+		// @Description  Improves an existing blog post by ID using AI suggestions.
+		// @Tags         AI
+		// @Security     BearerAuth
+		// @Accept       json
+		// @Produce      json
+		// @Param        id      path      string                true  "Blog ID"
+		// @Param        request body      map[string]interface{} true  "Improvement data"
+		// @Success      200  {object}  map[string]interface{}
+		// @Failure      400  {object}  map[string]string
+		// @Failure      401  {object}  map[string]string
+		// @Failure      404  {object}  map[string]string
+		// @Router       /ai/posts/{id}/improve [post]
 		AIRoutes.POST("/:id/improve", middlewares.AuthMiddleware(), aiController.ImproveBlogPost)
 
-		// Protected route to get AI suggestions for blog improvements by ID
+		// @Summary      AI suggestions for blog
+		// @Description  Provides AI-generated suggestions for improving a blog post by ID.
+		// @Tags         AI
+		// @Security     BearerAuth
+		// @Accept       json
+		// @Produce      json
+		// @Param        id   path      string  true  "Blog ID"
+		// @Success      200  {object}  map[string]interface{}
+		// @Failure      401  {object}  map[string]string
+		// @Failure      404  {object}  map[string]string
+		// @Router       /ai/posts/{id}/suggestions [post]
 		AIRoutes.POST("/:id/suggestions", middlewares.AuthMiddleware(), aiController.SuggestBlogImprovements)
 
-		// Protected route to get a summary of a blog post by ID
+		// @Summary      Summarize blog post
+		// @Description  Generates an AI-powered summary for a blog post by ID.
+		// @Tags         AI
+		// @Security     BearerAuth
+		// @Accept       json
+		// @Produce      json
+		// @Param        id   path      string  true  "Blog ID"
+		// @Success      200  {object}  map[string]interface{}
+		// @Failure      401  {object}  map[string]string
+		// @Failure      404  {object}  map[string]string
+		// @Router       /ai/posts/{id}/summary [post]
 		AIRoutes.POST("/:id/summary", middlewares.AuthMiddleware(), aiController.SummarizeBlog)
 
-		// Protected route to generate metadata for a blog post by ID
+		// @Summary      Generate metadata for blog
+		// @Description  Creates AI-generated metadata for a blog post by ID.
+		// @Tags         AI
+		// @Security     BearerAuth
+		// @Accept       json
+		// @Produce      json
+		// @Param        id   path      string  true  "Blog ID"
+		// @Success      200  {object}  map[string]interface{}
+		// @Failure      401  {object}  map[string]string
+		// @Failure      404  {object}  map[string]string
+		// @Router       /ai/posts/{id}/metadata [post]
 		AIRoutes.POST("/:id/metadata", middlewares.AuthMiddleware(), aiController.GenerateMetadata)
 	}
 }

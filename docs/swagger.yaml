@@ -1,0 +1,1212 @@
+basePath: /api/v1
+definitions:
+  controllers.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  controllers.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  controllers.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  controllers.ResetPasswordRequest:
+    properties:
+      email:
+        type: string
+      new_password:
+        maxLength: 50
+        minLength: 6
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - new_password
+    - otp
+    type: object
+  controllers.VerifyOTPRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  domain.Blog:
+    properties:
+      author_id:
+        description: |-
+          ID of the author who wrote the blog (required)
+          example: 507f1f77bcf86cd799439022
+        type: string
+      author_name:
+        description: |-
+          Author's name (required)
+          example: John Doe
+        type: string
+      content:
+        description: |-
+          Blog content body (required)
+          example: This is an introductory post about the Go programming language...
+        type: string
+      created_at:
+        description: |-
+          Timestamp when blog was created
+          example: 2025-08-10T15:04:05Z
+        type: string
+      id:
+        description: |-
+          Unique identifier for the blog (MongoDB ObjectID)
+          example: 507f1f77bcf86cd799439011
+        type: string
+      stats:
+        allOf:
+        - $ref: '#/definitions/domain.BlogStats'
+        description: Engagement metrics (views, likes, etc.)
+      tags:
+        description: |-
+          List of tags associated with the blog post (required)
+          example: ["programming", "golang", "tutorial"]
+        items:
+          type: string
+        type: array
+      title:
+        description: |-
+          Blog post title (required)
+          example: Introduction to Go
+        type: string
+      updated_at:
+        description: |-
+          Timestamp when blog was last updated
+          example: 2025-08-11T16:05:06Z
+        type: string
+    required:
+    - author_id
+    - author_name
+    - content
+    - tags
+    - title
+    type: object
+  domain.BlogStats:
+    properties:
+      comments:
+        description: |-
+          Number of comments on the blog
+          example: 45
+        type: integer
+      dislikes:
+        description: |-
+          Number of dislikes received
+          example: 10
+        type: integer
+      likes:
+        description: |-
+          Number of likes received
+          example: 256
+        type: integer
+      views:
+        description: |-
+          Number of times the blog was viewed
+          example: 1234
+        type: integer
+    type: object
+  domain.Comment:
+    properties:
+      blog_id:
+        description: |-
+          ID of the blog post this comment belongs to
+          example: 507f1f77bcf86cd799439022
+        type: string
+      content:
+        description: |-
+          Content/text of the comment
+          example: This is a great post! Thanks for sharing.
+        type: string
+      created_at:
+        description: |-
+          Timestamp when the comment was created
+          example: 2023-08-10T15:04:05Z07:00
+        type: string
+      id:
+        description: |-
+          Unique identifier for the comment
+          example: 507f1f77bcf86cd799439011
+        type: string
+      updated_at:
+        description: |-
+          Timestamp when the comment was last updated
+          example: 2023-08-11T16:05:06Z07:00
+        type: string
+      user_id:
+        description: |-
+          ID of the user who wrote the comment
+          example: 507f1f77bcf86cd799439033
+        type: string
+      username:
+        description: |-
+          Username of the commenter
+          example: johndoe
+        type: string
+    type: object
+  domain.GenerateBlogPostRequest:
+    properties:
+      audience:
+        description: |-
+          The target audience for the blog post (e.g., beginners, experts)
+          example: "beginners"
+        type: string
+      length:
+        description: |-
+          The preferred length of the blog post (e.g., short, medium, long)
+          example: "medium"
+        type: string
+      tone:
+        description: |-
+          The desired tone or style of the writing (e.g., formal, casual)
+          example: "formal"
+        type: string
+      topic:
+        description: |-
+          The main topic or subject of the blog post
+          example: "Introduction to Go concurrency"
+        type: string
+    type: object
+  domain.ImproveBlogPostRequest:
+    properties:
+      content:
+        description: |-
+          The current content of the blog post to be improved
+          example: "Go is a statically typed programming language..."
+        type: string
+      goal:
+        description: |-
+          The goal or focus of the improvement (e.g., clarity, engagement)
+          example: "increase clarity"
+        type: string
+    type: object
+  domain.User:
+    properties:
+      _id:
+        description: |-
+          The unique identifier of the user
+          example: 507f1f77bcf86cd799439011
+        type: string
+      bio:
+        description: |-
+          User biography or description
+          example: Developer and blogger
+        type: string
+      contact_info:
+        description: |-
+          Contact information (phone, etc.)
+          example: +1234567890
+        type: string
+      email:
+        description: |-
+          Email address of the user
+          example: johndoe@example.com
+        type: string
+      full_name:
+        description: |-
+          Full name of the user
+          example: John Doe
+        type: string
+      google_id:
+        description: |-
+          Google account ID for OAuth login
+          example: 1234567890abcdefg
+        type: string
+      is_verified:
+        description: |-
+          Whether the user has verified their email
+          example: true
+        type: boolean
+      otp_code:
+        description: OTP code for verification
+        type: string
+      password:
+        description: |-
+          Password (hashed) for authentication
+          required: true
+          min length: 6
+          max length: 50
+          example: $2a$12$eXampleHashedPassword...
+        maxLength: 50
+        minLength: 6
+        type: string
+      picture:
+        description: |-
+          URL to the user's profile picture
+          example: https://example.com/images/johndoe.jpg
+        type: string
+      profile_picture:
+        description: |-
+          Profile picture URL
+          example: https://example.com/images/profilepic.jpg
+        type: string
+      refresh_token:
+        description: Refresh token for session management
+        type: string
+      reset_otp:
+        description: Reset OTP code for password reset
+        type: string
+      role:
+        description: |-
+          Role of the user (e.g., user, admin)
+          example: user
+        type: string
+      username:
+        description: |-
+          Username of the user
+          required: true
+          min length: 3
+          max length: 50
+          example: johndoe123
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the Blog API documentation.
+  title: Blog API
+  version: "1.0"
+paths:
+  /ai/generate:
+    post:
+      consumes:
+      - application/json
+      description: Create a blog post from a request with AI assistance
+      parameters:
+      - description: Blog generation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.GenerateBlogPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate a blog post based on user input using AI
+      tags:
+      - AI
+  /ai/improve:
+    post:
+      consumes:
+      - application/json
+      description: Enhance blog content using AI with a specified goal
+      parameters:
+      - description: Blog improvement request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ImproveBlogPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Improve an existing blog post based on a goal
+      tags:
+      - AI
+  /ai/metadata:
+    post:
+      consumes:
+      - application/json
+      description: Extract title, tags, and description metadata using AI
+      parameters:
+      - description: Blog content
+        in: body
+        name: content
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate SEO metadata from blog content
+      tags:
+      - AI
+  /ai/suggest:
+    post:
+      consumes:
+      - application/json
+      description: Get AI-generated suggestions to improve blog content quality and
+        SEO
+      parameters:
+      - description: Blog content
+        in: body
+        name: content
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Suggest writing and SEO improvements for blog content
+      tags:
+      - AI
+  /ai/summarize:
+    post:
+      consumes:
+      - application/json
+      description: Get a concise AI-generated summary of blog content
+      parameters:
+      - description: Blog content
+        in: body
+        name: content
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Generate a short summary of the blog content
+      tags:
+      - AI
+  /auth/google/callback:
+    get:
+      consumes:
+      - application/json
+      description: Handles OAuth callback, exchanges code for tokens and user info
+      parameters:
+      - description: Authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OAuth login successful with user info and tokens
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: OAuth failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Handle Google OAuth callback
+      tags:
+      - auth
+  /auth/google/login:
+    get:
+      description: Redirects user to Google's OAuth 2.0 authorization page
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirect to Google OAuth consent screen
+      summary: Redirect to Google OAuth consent screen
+      tags:
+      - auth
+  /blogs:
+    get:
+      description: Get paginated and filtered list of blog posts
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Author name
+        in: query
+        name: author
+        type: string
+      - collectionFormat: csv
+        description: Tag filter
+        in: query
+        items:
+          type: string
+        name: tag
+        type: array
+      - description: Sort by field
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order (asc or desc)
+        in: query
+        name: sort_order
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List blog posts
+      tags:
+      - blogs
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog post by an authenticated user
+      parameters:
+      - description: Blog data
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Blog'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new blog post
+      tags:
+      - blogs
+  /blogs/{blog_id}/comments:
+    get:
+      description: Retrieve comments with pagination for a specific blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blog_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of comments per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get paginated comments for a blog post
+      tags:
+      - Comments
+    post:
+      consumes:
+      - application/json
+      description: Create a comment on a blog post. Requires authentication.
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blog_id
+        required: true
+        type: string
+      - description: Comment object
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add a new comment to a blog post
+      tags:
+      - Comments
+  /blogs/{id}:
+    delete:
+      description: Delete a blog post if you are the author or an admin
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a blog post
+      tags:
+      - blogs
+    get:
+      description: Retrieve a single blog post by its ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a blog post by ID
+      tags:
+      - blogs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing blog post if you are the author
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated blog data
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Blog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a blog post
+      tags:
+      - blogs
+  /comments/{comment_id}:
+    delete:
+      description: Delete a comment if the user is the owner or admin
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a comment
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: Update a comment if the user is the owner
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      - description: Updated comment content
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update an existing comment
+      tags:
+      - Comments
+  /users/demote/{id}:
+    post:
+      description: Lowers a user's role to regular user, requires admin privileges
+      parameters:
+      - description: Target user ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User demoted to regular user
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Demote admin to regular user
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user credentials and returns access and refresh tokens
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Access and refresh tokens
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user and return JWT tokens
+      tags:
+      - users
+  /users/logout:
+    post:
+      description: Invalidates user's refresh token to logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Logout failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Logout user
+      tags:
+      - users
+  /users/profile:
+    put:
+      consumes:
+      - application/json
+      description: Modifies the user's profile information
+      parameters:
+      - description: Updated user profile data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user profile
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to update profile
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user profile
+      tags:
+      - users
+  /users/promote/{id}:
+    post:
+      description: Elevates a user's role to admin, requires admin privileges
+      parameters:
+      - description: Target user ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User promoted to admin
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Promote user to admin
+      tags:
+      - users
+  /users/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Generates a new access token using a valid refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: token
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New access token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized - invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user and sends an OTP to verify email
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent to your email. Please verify.
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user and send OTP for email verification
+      tags:
+      - users
+  /users/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Verifies OTP and updates user's password
+      parameters:
+      - description: Reset password details
+        in: body
+        name: resetRequest
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input or reset failed
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset user password
+      tags:
+      - users
+  /users/send-reset-otp:
+    post:
+      consumes:
+      - application/json
+      description: Sends a one-time password to user's email for password reset
+      parameters:
+      - description: Email to send OTP
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reset OTP sent to your email address
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Failed to send reset OTP
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send password reset OTP
+      tags:
+      - users
+  /users/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verifies a user's email by OTP
+      parameters:
+      - description: Email and OTP
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account verified successfully!
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Verification failed or bad input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verify email using OTP
+      tags:
+      - users
+swagger: "2.0"

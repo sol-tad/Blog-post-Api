@@ -8,52 +8,80 @@ import (
 	"github.com/sol-tad/Blog-post-Api/repository"
 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
+
 // SetupBlogRoutes registers routes related to blog posts.
-// It initializes repositories for blogs, users, and interactions,
-// creates the blog use case and controller, then sets up routes to
-// list, get, create, update, and delete blog posts.
-// Creation, update, and deletion routes are protected by authentication middleware.
 func SetupBlogRoutes(router *gin.Engine) {
-	// Initialize blog repository with blog collection
 	blogRepo := repository.NewBlogRepo(config.BlogCollection)
-
-	// Initialize user repository with user collection
 	userRepo := repository.NewUserRepository(config.UserCollection)
-
-	// Initialize interaction repository with blog and interaction collections
 	interactionRepo := repository.NewInteractionRepository(
 		config.BlogCollection,
 		config.InteractionCollection,
 	)
 
-	// Create blog use case with blog, interaction, and user repositories
 	blogUsecase := usecase.NewBlogUseCase(blogRepo, interactionRepo, userRepo)
-
-	// Initialize blog controller with the use case
 	blogController := controllers.NewBlogController(blogUsecase)
 
-	// Group routes under /blogs
 	blogRoutes := router.Group("/blogs")
 	{
-		// Public routes
-
-		// List all blogs
+		// @Summary      List all blogs
+		// @Description  Retrieves a list of all blog posts.
+		// @Tags         blogs
+		// @Produce      json
+		// @Success      200  {array}   map[string]interface{}
+		// @Failure      500  {object}  map[string]string
+		// @Router       /blogs [get]
 		blogRoutes.GET("", blogController.ListBlogs)
 
-		// Get a single blog by id
+		// @Summary      Get blog by ID
+		// @Description  Retrieves a single blog post by its ID.
+		// @Tags         blogs
+		// @Produce      json
+		// @Param        id   path      string  true  "Blog ID"
+		// @Success      200  {object}  map[string]interface{}
+		// @Failure      404  {object}  map[string]string
+		// @Router       /blogs/{id} [get]
 		blogRoutes.GET("/:id", blogController.GetBlog)
 
-		// Protected routes requiring authentication
 		protected := blogRoutes.Group("")
 		protected.Use(middlewares.AuthMiddleware())
 		{
-			// Create a new blog post
+			// @Summary      Create a new blog
+			// @Description  Creates a new blog post. Requires authentication.
+			// @Tags         blogs
+			// @Security     BearerAuth
+			// @Accept       json
+			// @Produce      json
+			// @Param        blog  body      map[string]interface{}  true  "Blog data"
+			// @Success      201  {object}  map[string]interface{}
+			// @Failure      400  {object}  map[string]string
+			// @Failure      401  {object}  map[string]string
+			// @Router       /blogs/create [post]
 			protected.POST("/create", blogController.CreateBlog)
 
-			// Update a blog post by id
+			// @Summary      Update a blog
+			// @Description  Updates an existing blog post by ID. Requires authentication.
+			// @Tags         blogs
+			// @Security     BearerAuth
+			// @Accept       json
+			// @Produce      json
+			// @Param        id    path      string  true  "Blog ID"
+			// @Param        blog  body      map[string]interface{}  true  "Updated blog data"
+			// @Success      200  {object}  map[string]interface{}
+			// @Failure      400  {object}  map[string]string
+			// @Failure      401  {object}  map[string]string
+			// @Failure      404  {object}  map[string]string
+			// @Router       /blogs/{id} [put]
 			protected.PUT("/:id", blogController.UpdateBlog)
 
-			// Delete a blog post by id
+			// @Summary      Delete a blog
+			// @Description  Deletes a blog post by ID. Requires authentication.
+			// @Tags         blogs
+			// @Security     BearerAuth
+			// @Param        id   path      string  true  "Blog ID"
+			// @Success      200  {object}  map[string]string  "Blog deleted successfully"
+			// @Failure      401  {object}  map[string]string
+			// @Failure      404  {object}  map[string]string
+			// @Router       /blogs/{id} [delete]
 			protected.DELETE("/:id", blogController.DeleteBlog)
 		}
 	}
