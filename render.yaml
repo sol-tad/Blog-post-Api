@@ -1,8 +1,0 @@
-# render.yaml
-services:
-  - type: web
-    name: your-service-name
-    env: go
-    goVersion: "1.24.5"  # Matches your go.mod
-    buildCommand: "go build -o main"
-    startCommand: "./main"
