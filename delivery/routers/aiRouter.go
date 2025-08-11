@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,6 @@ import (
 // then setting up authenticated endpoints for AI-powered blog operations.
 func SetupAIRoutes(router *gin.Engine) {
 	geminiApiKey := os.Getenv("GEMINI_API_KEY")
-	log.Printf("------********************** %s  %s", geminiApiKey, "-------------------||")
 
 	gemini, _ := infrastructure.NewGeminiService(geminiApiKey)
 	aiUsecase := usecase.NewAIUsecase(gemini)

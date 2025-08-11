@@ -38,5 +38,9 @@ func main() {
     docs.SwaggerInfo.BasePath = "/api/v1"
     router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Start the server on the specified port
-	router.Run(port)
+	if port == "" {
+    	port = "10000" // Default for local dev
+}
+	router.Run(":" + port) 
+
 }
