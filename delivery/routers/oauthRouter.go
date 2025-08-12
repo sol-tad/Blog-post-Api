@@ -8,25 +8,30 @@ import (
 	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
-
+// SetupOAuthRouter configures OAuth-related routes on the provided Gin router.
+// It initializes the necessary repository, use case, and controller for OAuth operations,
+// then registers endpoints for Google OAuth login and callback handling.
 func SetupOAuthRouter(router *gin.Engine) {
+	// Retrieve the MongoDB user collection from config
+	userDbCollection := config.UserCollection
 
-	userDbCollection:=config.UserCollection
+	// Initialize user repository using the user collection
+	userRepository := repository.NewUserRepository(userDbCollection)
 
-	userRepository:=repository.NewUserRepository(userDbCollection)
-
+	// Create the OAuth use case with the user repository
 	oauthUsecase := usecase.NewOAuthUsecase(userRepository)
-	oauthController:=controllers.NewOAuthController(oauthUsecase)
 
-	oauthRoutes:=router.Group("")
+	// Initialize the OAuth controller with the use case
+	oauthController := controllers.NewOAuthController(oauthUsecase)
+
+	// Group routes without a specific prefix (root-level routes)
+	oauthRoutes := router.Group("")
 
 	{
-		
-		oauthRoutes.GET("/oauth/google/login",oauthController.Login)
-		oauthRoutes.GET("/oauth/google/callback",oauthController.Callback)
+		// Route to initiate Google OAuth login flow
+		oauthRoutes.GET("/oauth/google/login", oauthController.Login)
 
+		// OAuth callback endpoint to handle Google's response
+		oauthRoutes.GET("/oauth/google/callback", oauthController.Callback)
 	}
 }
-
-
-

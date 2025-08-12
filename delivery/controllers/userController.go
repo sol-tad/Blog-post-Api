@@ -3,21 +3,23 @@ package controllers
 import (
 	"context"
 	"log"
-
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sol-tad/Blog-post-Api/domain"
 )
 
+// UserController handles HTTP requests related to user operations
 type UserController struct {
 	UserUsecase domain.UserUsecaseInterface
 }
 
+// ForgotPasswordRequest defines the payload for requesting a password reset
 type ForgotPasswordRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+// ResetPasswordRequest defines the payload for resetting a password
 type ResetPasswordRequest struct {
 	Email       string `json:"email" binding:"required,email"`
 	OTP         string `json:"otp" binding:"required"`
@@ -30,6 +32,8 @@ func NewUserController(userUsecase domain.UserUsecaseInterface) *UserController 
 		UserUsecase: userUsecase,
 	}
 }
+
+// Register handles user registration and sends OTP for email verification
 func (uc *UserController) Register(c *gin.Context) {
 	var user domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -45,6 +49,7 @@ func (uc *UserController) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to your email. Please verify."})
 }
 
+// VerifyOTP confirms user's email using the OTP
 func (uc *UserController) VerifyOTP(c *gin.Context) {
 	var input struct {
 		Email string `json:"email"`
@@ -64,65 +69,64 @@ func (uc *UserController) VerifyOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Account verified successfully!"})
 }
 
-func (uc *UserController) Login(c *gin.Context){
-	var req struct{
+// Login authenticates the user and returns access and refresh tokens
+func (uc *UserController) Login(c *gin.Context) {
+	var req struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
 
-	if err:=c.ShouldBindJSON(&req); err!=nil{
-		c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	accessToken,refreshToken,err:=uc.UserUsecase.Login(context.Background(), req.Username, req.Password)
 
-	    if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-        return
-    }
+	accessToken, refreshToken, err := uc.UserUsecase.Login(context.Background(), req.Username, req.Password)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{
-        "access_token":  accessToken,
-        "refresh_token": refreshToken,
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
 }
 
-
-func (uc UserController) RefreshTokenController(c *gin.Context){
-	var req struct{
-		RefreshToken  string `json:"refresh_token"`
+// RefreshTokenController issues a new access token using a valid refresh token
+func (uc UserController) RefreshTokenController(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-	// log.Println("Refresh Token----------->:", req.RefreshToken)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	token,err:=uc.UserUsecase.RefreshToken(context.Background(),req.RefreshToken)
-
+	token, err := uc.UserUsecase.RefreshToken(context.Background(), req.RefreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token*****"})
-        return
-    }
-
-    c.JSON(http.StatusOK, gin.H{"access_token": token})
-}
-
-func (uc UserController) Logout(c *gin.Context) {
-		userID := c.GetString("id")
-		log.Println("id============:", userID)
-
-		err := uc.UserUsecase.Logout(context.Background(), userID)
-			if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "logout failed"})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
-
+		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"access_token": token})
+}
 
+// Logout invalidates the user's refresh token
+func (uc UserController) Logout(c *gin.Context) {
+	userID := c.GetString("id") // Extracted from middleware
+	log.Println("id============:", userID)
 
+	err := uc.UserUsecase.Logout(context.Background(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "logout failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
+}
+
+// SendResetOTP sends a password reset OTP to the user's email
 func (uc *UserController) SendResetOTP(c *gin.Context) {
 	var req ForgotPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -142,7 +146,7 @@ func (uc *UserController) SendResetOTP(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Reset OTP sent to your email address"})
 }
 
-
+// ResetPassword verifies OTP and updates the user's password
 func (uc *UserController) ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -159,6 +163,7 @@ func (uc *UserController) ResetPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
 
+// PromoteUser elevates a user's role to admin (requires admin privileges)
 func (uc *UserController) PromoteUser(c *gin.Context) {
 	adminID := c.GetString("id") // from middleware
 	targetID := c.Param("id")
@@ -170,6 +175,7 @@ func (uc *UserController) PromoteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User promoted to admin"})
 }
 
+// DemoteUser lowers a user's role to regular user (requires admin privileges)
 func (uc *UserController) DemoteUser(c *gin.Context) {
 	adminID := c.GetString("id") // from middleware
 	targetID := c.Param("id")
@@ -181,6 +187,7 @@ func (uc *UserController) DemoteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User demoted to regular user"})
 }
 
+// UpdateProfile modifies the user's profile information
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	userID := c.GetString("id") // from AuthMiddleware
 
@@ -198,5 +205,3 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
-
-
