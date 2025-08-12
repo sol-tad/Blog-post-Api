@@ -25,7 +25,6 @@ func SetupCommentRoutes(router *gin.Engine) {
 	// Initialize the comment controller with the use case
 	commentController := controllers.NewCommentController(commentUsecase)
 
-	// Group routes under /blogs/comments/:blog_id to handle comments for a specific blog post
 	commentRoutes := router.Group("/blogs/comments/:blog_id/")
 	{
 		// Public route: Get all comments for the specified blog post
@@ -37,11 +36,7 @@ func SetupCommentRoutes(router *gin.Engine) {
 		{
 			// Create a new comment on the blog post
 			protected.POST("", commentController.CreateComment)
-
-			// Update an existing comment by comment_id
 			protected.PUT("/:comment_id", commentController.UpdateComment)
-
-			// Delete a comment by comment_id
 			protected.DELETE("/:comment_id", commentController.DeleteComment)
 		}
 	}

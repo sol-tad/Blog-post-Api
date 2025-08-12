@@ -25,6 +25,7 @@ func SetupRouter() *gin.Engine{
 	SetupOAuthRouter(router)
 
 	// Register comment-related routes
+	//comment router
 	SetupCommentRoutes(router)
 
 	// Register blog post related routes

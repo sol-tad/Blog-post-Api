@@ -90,6 +90,7 @@ func (cc *CommentController) GetComments(c *gin.Context) {
 func (cc *CommentController) UpdateComment(c *gin.Context) {
 	id := c.Param("comment_id")
 
+	
 	var updatedComment domain.Comment
 	if err := c.ShouldBindJSON(&updatedComment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -125,8 +126,8 @@ func (cc *CommentController) UpdateComment(c *gin.Context) {
 // DeleteComment removes a comment if the user is the owner or an admin
 func (cc *CommentController) DeleteComment(c *gin.Context) {
 	id := c.Param("comment_id")
-
-	// Retrieve existing comment
+	
+	// Get existing comment
 	comment, err := cc.CommentUsecase.GetCommentByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
