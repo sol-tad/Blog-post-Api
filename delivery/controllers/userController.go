@@ -8,11 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sol-tad/Blog-post-Api/domain"
-	"github.com/sol-tad/Blog-post-Api/usecase"
 )
 
 type UserController struct {
-	UserUsecase *usecase.UserUsecase
+	UserUsecase domain.UserUsecaseInterface
 }
 
 type ForgotPasswordRequest struct {
@@ -26,7 +25,7 @@ type ResetPasswordRequest struct {
 }
 
 
-func NewUserController(userUsecase *usecase.UserUsecase) *UserController {
+func NewUserController(userUsecase domain.UserUsecaseInterface) *UserController {
 	return &UserController{
 		UserUsecase: userUsecase,
 	}
