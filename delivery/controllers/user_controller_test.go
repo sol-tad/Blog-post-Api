@@ -25,6 +25,10 @@ func setupRouter(mockUsecase *mocks.MockUserUsecase) *gin.Engine {
         c.Set("id", "uid9")
         c.Next()
     })
+	router.Use(func(c *gin.Context) {
+		c.Set("id", "admin1")
+		c.Next()
+	})
 	// register routes as in your app
 	router.POST("/register", ctrl.Register)
 	router.POST("/verify", ctrl.VerifyOTP)
@@ -214,10 +218,7 @@ func TestPromote_Demote_Success(t *testing.T) {
 	router := setupRouter(mockU)
 
 	// middleware to set admin id
-	router.Use(func(c *gin.Context) {
-		c.Set("id", "admin1")
-		c.Next()
-	})
+	
 
 	// Promote
 	mockU.On("PromoteUser", mock.Anything, "admin1", "target1").Return(nil)
